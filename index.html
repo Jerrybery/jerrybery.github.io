@@ -75,9 +75,33 @@
       header { background: transparent; color: var(--text); }
       footer { display: none; }
     }
+    /* 整体卡片 */
+    .project-card{list-style:none;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:30px;background:#fafafa}
+    .project-title a{font-size:1.3em;color:#0366d6;text-decoration:none}
+    .pitch{margin:8px 0 12px;color:#444}
+    .tags span{background:#0366d6;color:#fff;padding:3px 8px;border-radius:4px;font-size:0.8em;margin-right:6px}
+
+    /* 封面图 */
+    .cover{width:100%;max-height:200px;object-fit:cover;border-radius:6px;margin:10px 0}
+
+    /* 轮播 */
+    .carousel{display:flex;align-items:center;margin:10px 0}
+    .scroll-box{display:flex;overflow-x:auto;scroll-behavior:smooth;gap:10px}
+    .scroll-box img{height:150px;border-radius:6px;flex-shrink:0}
+    .arrow{background:#fff;border:1px solid #ccc;border-radius:50%;width:32px;height:32px;font-size:20px;cursor:pointer;margin:0 6px}
+
+    /* 本地视频 */
+    .demo-video{width:100%;max-height:220px;border-radius:6px;margin:10px 0}
+
+    /* B 站 iframe 比例 */
+    .video-wrapper{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:10px 0}
+    .video-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+
+    .meta{font-size:0.9em;color:#666;margin-top:10px}
   </style>
 </head>
 
+<!--The Head Part, a repeated animation of "Hello World"-->
 <body>
   <header>
     <h1 align="center">
@@ -93,7 +117,7 @@
   <main>
     <section id="about">
       <h2>About Me</h2>
-      <p>Newcomer for embodiment and AI, and willing to be buried. <br>
+      <p>Newcomer for embodiment and AI, and willing to learn and explore. <br>
         Currently studying with lastest idea about World Model. <br>
         Fed by peppermint candy.
       </p>
@@ -101,16 +125,50 @@
 
     <section id="projects">
       <h2>Porjects </h2>
-      <ul>
-        <li>
-          <strong><a href="#">Orca Hand Replica</a></strong> –
+      <ul class="project-list">
+        <li class="project-card">
+          <strong>
+            <a href="https://github.com/Jerrybery/orca_feetech_adaption/tree/feature/Jerrybery/feetech_adaption" target="_blank">Orca Hand Replica</a>
+          </strong> 
           <!-- FILL-IN: one-sentence elevator pitch -->
-           <p>
-            A replica of Orca Hand, with 3D printed parts and feetech servos, and cost only 10% budget (2300 RMB). <br>
-            Co-worked with my classmates, who helped me in modeling and hardware aspects. <br>
-            Successfully completed the project in my thrid grade semester. <br>
-           </p>
+          <p class="pitch">
+            With Feetech servo and 3D printing, we (with my classmate) built a replica of the orca hand with 10% budget of the original one. <br>
+            Also I build a human demonstration project based on computer vision to control the dexterous hand.
+          </p>
+          <p class="tags">
+            <span>3D Printing</span>
+            <span>Feetech Servo</span>
+            <span>Human demonstration</span>
+          </p>
+
+          <div class="carousel">
+            <button class="arrow" onclick="document.querySelector('.scroll-box').scrollBy({left: -200, behavior: 'smooth'})">&lt;</button>
+            <div class="scroll-box">
+              <img src="img/orcahand/assembly.jpg" alt="Assembly">
+              <img src="img/orcahand/servo.jpg" alt="Feetech Servo">
+            </div>
+            <button class="arrow" onclick="document.querySelector('.scroll-box').scrollBy({left: 200, behavior: 'smooth'})">&gt;</button>
+          </div>
+
+          <div class="meta">
+            <time>2025</time> |
+            <span>Role: Co-leader, Software Migration</span>
+          </div>
+
+          <details class="explore">
+            <summary>Explore More</summary>
+            <p>
+              The project is based on the open-source Orca Hand from OpenAI. <br>
+              We redesigned the finger structure to fit the Feetech servos, and 3D printed the parts. <br>
+              For the control system, we adapted the original software to work with our hardware setup. <br>
+              Additionally, I developed a computer vision system to capture human hand movements and translate them into commands for the dexterous hand. <br>
+              If you are interested, please check out the <a href="https://github.com/Jerrybery/V4D">vision for dexterous action</a> (V4D) on GitHub. <br>
+              <del style="color: #9a9a9a;">Though it can be called half made...... it still worked somehow.</del>
+            </p>
+          </details>
+
         </li>
+
         <li>
           <strong><a href="#">Multi-Agent System On Robot Manipulation In Occlusion Scene</a></strong> –
           <!-- FILL-IN: one-sentence elevator pitch -->
