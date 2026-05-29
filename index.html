@@ -2,211 +2,604 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Liu Jierui – Personal Page</title>
+  <title>Jierui Liu — Embodied AI &amp; Agent Memory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Jierui Liu — undergraduate researcher in embodied AI, agent memory systems, and multi-agent systems.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --accent: #0066ff;
-      --bg: #ffffff;
-      --text: #222222;
-      --muted: #666666;
-      --code-bg: #f5f7fa;
+      --bg:        #eef1f3;
+      --bg-card:   #ffffff;
+      --text:      #14191c;
+      --muted:     #5a6670;
+      --line:      #d4dbe0;
+      --accent:    #0c8f7d;
+      --accent-2:  #0a7464;
+      --chip-bg:   #e2e8ec;
+      --shadow:    0 1px 2px rgba(20,25,28,.04), 0 8px 24px rgba(20,25,28,.06);
+      --display: "Bricolage Grotesque", Georgia, serif;
+      --body: "IBM Plex Sans", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #121212;
-        --text: #e5e5e5;
-        --muted: #9a9a9a;
-        --code-bg: #1e1e1e;
+        --bg:        #0d1113;
+        --bg-card:   #161b1e;
+        --text:      #e4edf0;
+        --muted:     #8794a0;
+        --line:      #232b30;
+        --accent:    #2dd4bf;
+        --accent-2:  #5eead4;
+        --chip-bg:   #19211f;
+        --shadow:    0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
       }
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: var(--body);
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      line-height: 1.65;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+      /* subtle paper grain via layered radial dots */
+      background-image:
+        radial-gradient(var(--line) .5px, transparent .5px);
+      background-size: 22px 22px;
+      background-position: -11px -11px;
     }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
+
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ---------- Hero ---------- */
     header {
-      padding: 4rem 1.5rem 2.5rem;
-      text-align: center;
-      background: linear-gradient(135deg, var(--accent) 0%, #0047b3 100%);
-      color: #fff;
+      padding: 6rem 0 3.5rem;
+      border-bottom: 1px solid var(--line);
     }
-    header h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: .5px; }
-    header p { font-size: 1.125rem; margin-top: .5rem; opacity: .9; }
-    main {
-      flex: 1;
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem;
-    }
-    section { margin-bottom: 3rem; }
-    h2 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
+    .kicker {
+      font-family: var(--mono);
+      font-size: .8rem;
+      letter-spacing: .04em;
       color: var(--accent);
-      border-bottom: 2px solid var(--accent);
+      margin-bottom: 1.4rem;
+    }
+    /* CSS typewriter */
+    .type {
       display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: .12em solid var(--accent);
+      width: 0;
+      vertical-align: bottom;
+      animation: typing 2.6s steps(13) infinite alternate,
+                 blink .7s step-end infinite;
     }
-    ul { list-style: none; padding-left: 0; }
-    li { margin-bottom: 1rem; }
-    time {
+    @keyframes typing { from { width: 0 } 45%,100% { width: 13ch } }
+    @keyframes blink  { 50% { border-color: transparent } }
+
+    header h1 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(2.8rem, 8vw, 4.6rem);
+      line-height: 1.02;
+      letter-spacing: -.02em;
+      margin-bottom: 1rem;
+    }
+    header .tagline {
+      font-family: var(--mono);
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 40ch;
+    }
+    header .tagline .em { color: var(--text); }
+
+    /* hero visual */
+    header .wrap { display: grid; grid-template-columns: 1fr 250px; gap: 2.5rem; align-items: center; }
+    .hero-visual { position: relative; }
+    .hero-frame {
+      width: 100%; aspect-ratio: 1 / 1;
+      border: 1px solid var(--line); border-radius: 18px;
+      background-color: var(--bg-card);
+      background-image: radial-gradient(var(--line) .5px, transparent .5px);
+      background-size: 18px 18px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .hero-frame svg { width: 76%; height: 76%; }
+    .node-pulse { animation: pulse 2.6s ease-in-out infinite; transform-origin: center; }
+    @keyframes pulse { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
+    .monogram {
+      position: absolute; left: -14px; bottom: -14px;
+      width: 52px; height: 52px; border-radius: 13px;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-weight: 600; font-size: 1.05rem;
+      box-shadow: var(--shadow); border: 3px solid var(--bg);
+    }
+    @media (max-width: 680px) {
+      header .wrap { grid-template-columns: 1fr; }
+      .hero-visual { max-width: 200px; margin-top: 1.8rem; }
+    }
+
+    /* project card figure */
+    .card-figure {
+      height: 116px; border: 1px solid var(--line); border-radius: 9px;
+      background: var(--bg); margin-bottom: 1rem; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-figure svg { width: 100%; height: 100%; display: block; }
+    .card-figure img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; display: block; }
+    .explore-img { width: 100%; border-radius: 8px; border: 1px solid var(--line); margin-top: .8rem; }
+
+    /* ---------- Sections ---------- */
+    main { padding: 1rem 0 2rem; }
+    section { padding: 3.2rem 0; border-bottom: 1px solid var(--line); }
+    section:last-of-type { border-bottom: 0; }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: .82rem;
       font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
       color: var(--muted);
-      margin-right: .5rem;
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: .8rem;
     }
-    a {
+    h2::before {
+      content: "";
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .lead {
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: clamp(1.25rem, 3vw, 1.6rem);
+      line-height: 1.4;
+      letter-spacing: -.01em;
+      margin-bottom: 1rem;
+    }
+    .about p { color: var(--muted); max-width: 60ch; }
+    .about p + p { margin-top: .8rem; }
+    .about .candy { color: var(--accent); }
+
+    /* ---------- Experience ---------- */
+    .role { margin-bottom: 2.4rem; }
+    .role:last-child { margin-bottom: 0; }
+    .role-head {
+      display: flex; flex-wrap: wrap;
+      align-items: baseline; gap: .2rem .9rem;
+      margin-bottom: .2rem;
+    }
+    .role-head h3 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -.01em;
+    }
+    .role-head .at { color: var(--accent); font-weight: 700; }
+    .role-meta {
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: .9rem;
+    }
+    .role ul { list-style: none; }
+    .role li {
+      position: relative;
+      padding-left: 1.3rem;
+      margin-bottom: .55rem;
+      color: var(--muted);
+    }
+    .role li::before {
+      content: "›";
+      position: absolute; left: 0; top: -.05em;
       color: var(--accent);
-      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 1.05rem;
     }
-    a:hover { text-decoration: underline; }
-    footer {
-      text-align: center;
-      padding: 2rem 1rem;
-      font-size: .875rem;
+    .role li strong { color: var(--text); font-weight: 600; }
+
+    /* ---------- Projects ---------- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.1rem;
+    }
+    @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.4rem 1.4rem 1.5rem;
+      box-shadow: var(--shadow);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 2px 6px rgba(12,143,125,.10), 0 14px 34px rgba(20,25,28,.12);
+    }
+    .card.span-2 { grid-column: 1 / -1; }
+
+    .card-top {
+      display: flex; align-items: baseline;
+      justify-content: space-between; gap: 1rem;
+      margin-bottom: .5rem;
+    }
+    .card h3 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.3rem;
+      letter-spacing: -.01em;
+    }
+    .card h3 a { color: var(--text); }
+    .card h3 a:hover { color: var(--accent); text-decoration: none; }
+    .card .when {
+      font-family: var(--mono);
+      font-size: .72rem;
       color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    /* tiny print styles */
-    @media print {
-      header { background: transparent; color: var(--text); }
-      footer { display: none; }
+    .card .role-tag {
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--accent);
+      margin-bottom: .7rem;
     }
-    /* 整体卡片 */
-    .project-card{list-style:none;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:30px;background:#fafafa}
-    .project-title a{font-size:1.3em;color:#0366d6;text-decoration:none}
-    .pitch{margin:8px 0 12px;color:#444}
-    .tags span{background:#0366d6;color:#fff;padding:3px 8px;border-radius:4px;font-size:0.8em;margin-right:6px}
+    .card p.desc { color: var(--muted); font-size: .96rem; margin-bottom: .9rem; }
+    .card p.desc strong { color: var(--text); font-weight: 600; }
 
-    /* 封面图 */
-    .cover{width:100%;max-height:200px;object-fit:cover;border-radius:6px;margin:10px 0}
+    .tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .tags span {
+      font-family: var(--mono);
+      font-size: .7rem;
+      background: var(--chip-bg);
+      color: var(--muted);
+      padding: .25rem .55rem;
+      border-radius: 5px;
+      border: 1px solid var(--line);
+    }
 
-    /* 轮播 */
-    .carousel{display:flex;align-items:center;margin:10px 0}
-    .scroll-box{display:flex;overflow-x:auto;scroll-behavior:smooth;gap:10px}
-    .scroll-box img{height:150px;border-radius:6px;flex-shrink:0}
-    .arrow{background:#fff;border:1px solid #ccc;border-radius:50%;width:32px;height:32px;font-size:20px;cursor:pointer;margin:0 6px}
+    details.explore { margin-top: .9rem; }
+    details.explore summary {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--accent);
+      cursor: pointer;
+      list-style: none;
+    }
+    details.explore summary::-webkit-details-marker { display: none; }
+    details.explore summary::before { content: "+ "; }
+    details.explore[open] summary::before { content: "– "; }
+    details.explore p {
+      color: var(--muted);
+      font-size: .92rem;
+      margin-top: .7rem;
+      padding-top: .7rem;
+      border-top: 1px solid var(--line);
+    }
+    details.explore del { color: var(--muted); opacity: .7; }
 
-    /* 本地视频 */
-    .demo-video{width:100%;max-height:220px;border-radius:6px;margin:10px 0}
+    /* ---------- Awards ---------- */
+    .award { margin-bottom: 1.5rem; }
+    .award:last-child { margin-bottom: 0; }
+    .award-head {
+      display: flex; flex-wrap: wrap; align-items: baseline;
+      gap: .3rem .9rem;
+    }
+    .award-head h3 { font-family: var(--display); font-weight: 700; font-size: 1.15rem; }
+    .award-head .prize { color: var(--accent); font-family: var(--mono); font-size: .78rem; }
+    .award .when { font-family: var(--mono); font-size: .76rem; color: var(--muted); }
+    .award p { color: var(--muted); font-size: .94rem; margin-top: .2rem; }
 
-    /* B 站 iframe 比例 */
-    .video-wrapper{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:10px 0}
-    .video-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+    /* ---------- Skills ---------- */
+    .skillset { display: flex; flex-direction: column; gap: 1.1rem; }
+    .skillrow { display: grid; grid-template-columns: 160px 1fr; gap: 1rem; align-items: start; }
+    @media (max-width: 560px) { .skillrow { grid-template-columns: 1fr; gap: .4rem; } }
+    .skillrow .label {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--muted);
+      letter-spacing: .03em;
+      padding-top: .35rem;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .chips span {
+      font-family: var(--mono);
+      font-size: .8rem;
+      background: var(--chip-bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: .3rem .65rem;
+      border-radius: 6px;
+    }
+    .skill-note { font-size: .9rem; color: var(--muted); margin-top: 1.2rem; }
+    .skill-note strong { color: var(--text); }
 
-    .meta{font-size:0.9em;color:#666;margin-top:10px}
+    /* ---------- Contact ---------- */
+    .contact-links { display: flex; flex-wrap: wrap; gap: .6rem 1.5rem; font-family: var(--mono); font-size: .95rem; }
+    .contact-links a { display: inline-flex; align-items: center; gap: .4rem; }
+
+    footer {
+      padding: 2.5rem 0 3rem;
+      font-family: var(--mono);
+      font-size: .74rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    /* ---------- Load reveal ---------- */
+    .reveal { opacity: 0; transform: translateY(14px); animation: rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .type { animation: none; opacity: 1; transform: none; width: auto; border-right: 0; }
+    }
   </style>
 </head>
 
-<!--The Head Part, a repeated animation of "Hello World"-->
 <body>
   <header>
-    <h1 align="center">
-    <a href="https://sunguoqi.com/">
-        <img src="https://readme-typing-svg.herokuapp.com/?lines=print(%22Hello%2C%20World!%22);Hello,%20World!&center=true&size=27">
-    </a>
-    </h1>
-
-    <h1>Liu Jierui</h1>          <!-- FILL-IN -->
-    <p>Keep Learning From Anxeity</p> <!-- FILL-IN -->
+    <div class="wrap">
+      <div class="hero-text">
+        <p class="kicker reveal" style="animation-delay:.05s"><span class="type">Hello, World!</span></p>
+        <h1 class="reveal" style="animation-delay:.15s">Jierui&nbsp;Liu</h1>
+        <p class="tagline reveal" style="animation-delay:.28s">
+          <span class="em">Keep learning from anxiety.</span><br>
+          Embodied AI · agent memory · multi-agent systems.
+        </p>
+      </div>
+      <div class="hero-visual reveal" style="animation-delay:.42s">
+        <div class="hero-frame">
+          <svg viewBox="0 0 120 120" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <g stroke="var(--line)" stroke-width="1.4">
+              <line x1="20" y1="98" x2="100" y2="98"/>
+              <line x1="20" y1="106" x2="100" y2="106"/>
+            </g>
+            <g stroke="var(--accent)" stroke-width="1.6">
+              <line x1="30" y1="32" x2="82" y2="28"/>
+              <line x1="82" y1="28" x2="60" y2="60"/>
+              <line x1="30" y1="32" x2="60" y2="60"/>
+              <line x1="60" y1="60" x2="36" y2="82"/>
+              <line x1="60" y1="60" x2="88" y2="78"/>
+              <line x1="36" y1="82" x2="88" y2="78"/>
+            </g>
+            <g fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.6">
+              <circle cx="30" cy="32" r="5"/>
+              <circle cx="82" cy="28" r="5"/>
+              <circle cx="36" cy="82" r="5"/>
+              <circle cx="88" cy="78" r="5"/>
+            </g>
+            <circle class="node-pulse" cx="60" cy="60" r="7" fill="var(--accent)"/>
+          </svg>
+        </div>
+        <div class="monogram">JL</div>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <section id="about">
-      <h2>About Me</h2>
-      <p>Newcomer for embodiment and AI, and willing to learn and explore. <br>
-        Currently studying with lastest idea about World Model. <br>
-        Fed by peppermint candy.
+  <main class="wrap">
+    <section id="about" class="about reveal" style="animation-delay:.35s">
+      <h2>About</h2>
+      <p class="lead">A newcomer to embodied AI and agents — learning in public, building in the open.</p>
+      <p>
+        Undergraduate at South China University of Technology, currently obsessed with how
+        agents <em>remember</em>: memory organization, multi-user consolidation, and how to
+        actually <em>measure</em> all of it. On the side I tinker with world models and
+        multi-agent systems.
       </p>
+      <p>Powered, reliably, by <span class="candy">peppermint candy</span>.</p>
+    </section>
+
+    <section id="experience">
+      <h2>Experience</h2>
+
+      <div class="role">
+        <div class="role-head">
+          <h3>LightOrigins <span class="at">/ Embodied AI Intern</span></h3>
+        </div>
+        <p class="role-meta">Shenzhen, China · Mar 2026 – Present</p>
+        <ul>
+          <li>Contributed to <strong>embodied-agent development</strong>, focused primarily on the agent's memory system.</li>
+          <li>Helped build the <strong>evaluation pipeline</strong> for the memory system.</li>
+          <li>Designed <strong>proactive behaviors</strong> triggered by event injection — going beyond fixed cron/heartbeat schedules so the agent reacts to what happens around it, rather than acting on a timer.</li>
+          <li>Worked across a range of <strong>agent and robot-embodiment capabilities</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="role">
+        <div class="role-head">
+          <h3>MIAA Lab, SCUT <span class="at">/ Undergraduate Research Assistant</span></h3>
+        </div>
+        <p class="role-meta">Guangzhou, China · Apr 2025 – Jan 2026</p>
+        <ul>
+          <li>Surveyed hierarchical multi-agent RL architectures; designed benchmark tasks in <strong>Sapien3</strong> to evaluate hierarchical cooperation and credit assignment.</li>
+          <li>Contributed prompt-engineering strategies to guide sub-agent behavior and improve task decomposition within the hierarchical framework.</li>
+          <li>Helped build a framework translating raw <strong>haptic sensor data</strong> into semantic descriptors (roughness, hardness) for embodied agents.</li>
+        </ul>
+      </div>
     </section>
 
     <section id="projects">
-      <h2>Porjects </h2>
-      <ul class="project-list">
-        <li class="project-card">
-          <strong>
-            <a href="https://github.com/Jerrybery/orca_feetech_adaption/tree/feature/Jerrybery/feetech_adaption" target="_blank">Orca Hand Replica</a>
-          </strong> 
-          <!-- FILL-IN: one-sentence elevator pitch -->
-          <p class="pitch">
-            With Feetech servo and 3D printing, we (with my classmate) built a replica of the orca hand with 10% budget of the original one. <br>
-            Also I build a human demonstration project based on computer vision to control the dexterous hand.
-          </p>
-          <p class="tags">
-            <span>3D Printing</span>
-            <span>Feetech Servo</span>
-            <span>Human demonstration</span>
-          </p>
+      <h2>Projects</h2>
+      <ul class="grid" style="list-style:none">
 
-          <div class="carousel">
-            <button class="arrow" onclick="document.querySelector('.scroll-box').scrollBy({left: -200, behavior: 'smooth'})">&lt;</button>
-            <div class="scroll-box">
-              <img src="img/orcahand/assembly.jpg" alt="Assembly">
-              <img src="img/orcahand/servo.jpg" alt="Feetech Servo">
-            </div>
-            <button class="arrow" onclick="document.querySelector('.scroll-box').scrollBy({left: 200, behavior: 'smooth'})">&gt;</button>
+        <!-- TODO: dam-bench 仍在补充工作，暂时下线，完善后再放出
+        <li class="card">
+          <div class="card-figure">
+            <svg viewBox="0 0 300 116" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="22" y="44" width="44" height="28" rx="5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+              <path d="M66 58 H92" stroke="var(--muted)" stroke-width="2"/>
+              <path d="M86 53 l6 5 -6 5" stroke="var(--muted)" stroke-width="2"/>
+              <rect x="92" y="44" width="44" height="28" rx="5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+              <path d="M136 58 H162" stroke="var(--muted)" stroke-width="2"/>
+              <path d="M156 53 l6 5 -6 5" stroke="var(--muted)" stroke-width="2"/>
+              <rect x="162" y="44" width="44" height="28" rx="5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+              <path d="M206 58 H232" stroke="var(--muted)" stroke-width="2"/>
+              <path d="M226 53 l6 5 -6 5" stroke="var(--muted)" stroke-width="2"/>
+              <rect x="232" y="32" width="52" height="52" rx="7" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.5"/>
+              <path d="M244 58 l8 8 14 -17" stroke="var(--accent)" stroke-width="2.6"/>
+              <g fill="var(--accent)">
+                <circle cx="44" cy="58" r="2.6"/><circle cx="114" cy="58" r="2.6"/><circle cx="184" cy="58" r="2.6"/>
+              </g>
+            </svg>
           </div>
-
-          <div class="meta">
-            <time>2025</time> |
-            <span>Role: Co-leader, Software Migration</span>
+          <div class="card-top">
+            <h3><a href="https://github.com/Jerrybery/dam-bench" target="_blank" rel="noopener">dam-bench</a></h3>
+            <span class="when">May 2026 -</span>
           </div>
+          <p class="role-tag">Evaluation framework, agent memory</p>
+          <p class="desc">A trajectory-driven benchmark for AI-agent memory systems, focused on the under-studied maintenance layer.</p>
+          <p class="tags"><span>Benchmarking</span><span>LLM judges</span><span>Multi-user</span></p>
+        </li>
+        -->
 
+        <li class="card">
+          <div class="card-figure">
+            <svg viewBox="0 0 300 116" aria-hidden="true" font-family="IBM Plex Mono, ui-monospace, monospace">
+              <g fill="var(--muted)" font-size="9">
+                <text x="26" y="16">L1</text><text x="26" y="34">L2</text><text x="26" y="52">L3</text>
+                <text x="26" y="70">L4</text><text x="26" y="88">L5</text><text x="26" y="106">L6</text>
+              </g>
+              <g fill="var(--accent)">
+                <rect x="60" y="6"  width="180" height="13" rx="3" opacity=".28"/>
+                <rect x="60" y="24" width="180" height="13" rx="3" opacity=".42"/>
+                <rect x="60" y="42" width="180" height="13" rx="3" opacity=".55"/>
+                <rect x="60" y="60" width="180" height="13" rx="3" opacity=".68"/>
+                <rect x="60" y="78" width="180" height="13" rx="3" opacity=".82"/>
+                <rect x="60" y="96" width="180" height="13" rx="3" opacity="1"/>
+              </g>
+              <text x="150" y="105.5" fill="#fff" font-size="8.5" text-anchor="middle" font-weight="600" font-family="IBM Plex Mono, ui-monospace, monospace">DREAM</text>
+            </svg>
+          </div>
+          <div class="card-top">
+            <h3><a href="https://github.com/Jerrybery/CyberG" target="_blank" rel="noopener">CyberG</a></h3>
+            <span class="when">May 2026 –</span>
+          </div>
+          <p class="role-tag">Multi-user household AI agent</p>
+          <p class="desc">
+            A family-oriented agent built on a <strong>six-layer memory hierarchy (L1–L6)</strong> — from rule-level
+            instructions and session context, up through working memory, a daily diary, a long-term store, and a nightly
+            <strong>Dream consolidation</strong>. Each member gets their own session, and it flags contradictory facts
+            across the family.
+          </p>
+          <p class="tags"><span>L1–L6 memory</span><span>Dream engine</span><span>Multi-user</span></p>
+        </li>
+
+        <li class="card">
+          <div class="card-figure">
+            <img src="img/orcahand/assembly.jpg" alt="Orca Hand assembly">
+          </div>
+          <div class="card-top">
+            <h3><a href="https://github.com/Jerrybery/orca_feetech_adaption/tree/feature/Jerrybery/feetech_adaption" target="_blank" rel="noopener">Orca Hand Replica</a></h3>
+            <span class="when">2025</span>
+          </div>
+          <p class="role-tag">Co-lead · software migration</p>
+          <p class="desc">
+            With a classmate, built a replica of the Orca dexterous hand using <strong>Feetech servos</strong> and 3D printing —
+            at roughly <strong>10% of the original budget</strong>. I also built a computer-vision human-demonstration system to
+            teleoperate the hand.
+          </p>
+          <p class="tags"><span>3D Printing</span><span>Feetech Servo</span><span>Human demonstration</span></p>
           <details class="explore">
-            <summary>Explore More</summary>
+            <summary>Explore more</summary>
             <p>
-              The project is based on the open-source Orca Hand from OpenAI. <br>
-              We redesigned the finger structure to fit the Feetech servos, and 3D printed the parts. <br>
-              For the control system, we adapted the original software to work with our hardware setup. <br>
-              Additionally, I developed a computer vision system to capture human hand movements and translate them into commands for the dexterous hand. <br>
-              If you are interested, please check out the <a href="https://github.com/Jerrybery/V4D">vision for dexterous action</a> (V4D) on GitHub. <br>
-              <del style="color: #9a9a9a;">Though it can be called half made...... it still worked somehow.</del>
+              Based on the open-source Orca Hand. We redesigned the finger structure to fit Feetech servos, 3D-printed the parts,
+              and adapted the original control software to our hardware. On top of that I built a CV system that captures hand
+              movements and translates them into commands for the hand — see
+              <a href="https://github.com/Jerrybery/V4D" target="_blank" rel="noopener">V4D (Vision for Dexterous action)</a> on GitHub.
+              <del>Though it can be called half-made… it still worked somehow.</del>
             </p>
+            <img class="explore-img" src="img/orcahand/servo.jpg" alt="Feetech servo close-up">
           </details>
-
         </li>
 
-        <li>
-          <strong><a href="#">Multi-Agent System On Robot Manipulation In Occlusion Scene</a></strong> –
-          <!-- FILL-IN: one-sentence elevator pitch -->
-           <p>
-            Still on going now, pretty close to its completion. <br>
-            As a new commer for serious academic project, it is my honor to work with my peer advicer and classmate. <br>
-           </p>
-        </li>
-        <!-- add more <li> blocks as needed -->
       </ul>
     </section>
 
-    <section id="education">
-      <h2>Education</h2>
-      <ul>
-        <li>
-          <time>2023 – 2027</time>
-          <strong>bachlor of engineering</strong>, South China University of Technology
-        </li>
-      </ul>
+    <section id="awards">
+      <h2>Awards</h2>
+      <div class="award">
+        <div class="award-head">
+          <h3>China Robotics &amp; Artificial Intelligence Competition</h3>
+          <span class="prize">National First Prize</span>
+          <span class="when">Aug 2025</span>
+        </div>
+        <p>Developed an intelligent robotic manipulation system achieving near-human behavior in retail simulation tasks.</p>
+      </div>
+      <div class="award">
+        <div class="award-head">
+          <h3>COMAP Mathematical Contest in Modeling</h3>
+          <span class="when">Feb 2024</span>
+        </div>
+        <p>Modeling Specialist (Team 2423684) — built computational models with sensitivity analysis under a 4-day constraint.</p>
+      </div>
+    </section>
+
+    <section id="skills">
+      <h2>Skills</h2>
+      <div class="skillset">
+        <div class="skillrow">
+          <span class="label">Languages</span>
+          <div class="chips"><span>Python</span><span>JavaScript / TypeScript</span></div>
+        </div>
+        <div class="skillrow">
+          <span class="label">AI &amp; ML</span>
+          <div class="chips"><span>PyTorch</span><span>LLM agents</span><span>Multi-agent orchestration</span><span>Memory systems / RAG</span><span>Evaluation methodology</span></div>
+        </div>
+        <!-- TODO: Edge & Embedded 与实习强绑定，暂时下线
+        <div class="skillrow">
+          <span class="label">Edge &amp; Embedded</span>
+          <div class="chips"><span>Jetson (CUDA)</span><span>RKNN (NPU)</span><span>ARM SoC</span><span>Quantization &amp; benchmarking</span></div>
+        </div>
+        -->
+        <div class="skillrow">
+          <span class="label">Systems</span>
+          <div class="chips"><span>FastAPI</span><span>Linux</span><span>Git</span><span>Docker</span><span>MCP</span></div>
+        </div>
+        <div class="skillrow">
+          <span class="label">AI-Augmented Dev</span>
+          <div class="chips"><span>Claude Code</span><span>Cursor</span></div>
+        </div>
+      </div>
+      <p class="skill-note">
+        <strong>Note:</strong> a lot of my recent work is agent-assisted — a ~7,000-LOC evaluation framework with 200+ tests
+        came together in under three weeks.
+      </p>
     </section>
 
     <section id="contact">
       <h2>Contact</h2>
-      <p>
-        Email: <a href="mailto:jerryl01@foxmail.com">jerryl01@foxmail.com</a> |
-        GitHub: <a href="https://github.com/Jerrybery">Jerrybery</a> |
-        <!-- LinkedIn: <a href="https://linkedin.com/in/liujierui">liujierui</a> -->
-      </p>
+      <div class="contact-links">
+        <a href="mailto:jerryl01@foxmail.com">✉ jerryl01@foxmail.com</a>
+        <a href="https://github.com/Jerrybery" target="_blank" rel="noopener">↗ github.com/Jerrybery</a>
+      </div>
     </section>
   </main>
 
-  <footer>
-    © <span id="year"></span> Liu Jierui. Built with plain HTML/CSS and hosted on GitHub Pages.
+  <footer class="wrap">
+    © <span id="year"></span> Jierui Liu — built with plain HTML/CSS, hosted on GitHub Pages.
   </footer>
 
   <script>
-    // auto-update footer year
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
