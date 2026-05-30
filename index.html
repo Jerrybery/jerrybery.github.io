@@ -335,6 +335,15 @@
     .skill-note { font-size: .9rem; color: var(--muted); margin-top: 1.2rem; }
     .skill-note strong { color: var(--text); }
 
+    /* ---------- Activity ---------- */
+    .activity-cap { color: var(--muted); font-size: .92rem; margin-bottom: 1.1rem; }
+    .activity-card {
+      background: var(--bg-card); border: 1px solid var(--line);
+      border-radius: 12px; padding: 1.2rem; box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    .activity-card img { width: 100%; min-width: 560px; display: block; }
+
     /* ---------- Contact ---------- */
     .contact-links { display: flex; flex-wrap: wrap; gap: .6rem 1.5rem; font-family: var(--mono); font-size: .95rem; }
     .contact-links a { display: inline-flex; align-items: center; gap: .4rem; }
@@ -533,6 +542,16 @@
         </li>
 
       </ul>
+    </section>
+
+    <section id="activity">
+      <h2>Activity</h2>
+      <p class="activity-cap">GitHub contributions over the past year — private repos included.</p>
+      <div class="activity-card">
+        <img src="https://ghchart.rshah.org/0c8f7d/Jerrybery"
+             alt="Jierui Liu's GitHub contribution graph over the past year"
+             loading="lazy">
+      </div>
     </section>
 
     <section id="awards">
