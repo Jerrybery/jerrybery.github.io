@@ -1,0 +1,40 @@
+name: Update activity
+
+on:
+  schedule:
+    - cron: "17 4 * * *"   # daily, ~12:17 Beijing time
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-activity
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build activity.json
+        env:
+          ACTIVITY_TOKEN: ${{ secrets.ACTIVITY_TOKEN }}
+        run: node scripts/build-activity.mjs
+
+      - name: Commit if changed
+        run: |
+          if [[ -n "$(git status --porcelain activity.json)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add activity.json
+            git commit -m "chore: refresh activity.json"
+            git push
+          else
+            echo "No changes."
+          fi
