@@ -55,14 +55,19 @@ const days30 = user.last30.contributionCalendar.weeks.flatMap((w) => w.contribut
 const commits = user.last30.totalCommitContributions;
 const active_days = days30.filter((d) => d.contributionCount > 0).length;
 
-// streak: trailing run of active days in the full-year calendar
+// streak: longest run of consecutive active days in the full-year calendar
 const yearDays = user.year.contributionCalendar.weeks
   .flatMap((w) => w.contributionDays)
   .sort((a, b) => (a.date < b.date ? -1 : 1));
 let streak_days = 0;
-for (let i = yearDays.length - 1; i >= 0; i--) {
-  if (yearDays[i].contributionCount > 0) streak_days++;
-  else break;
+let run = 0;
+for (const d of yearDays) {
+  if (d.contributionCount > 0) {
+    run++;
+    if (run > streak_days) streak_days = run;
+  } else {
+    run = 0;
+  }
 }
 
 // sparkline: weekly sums for the last 26 weeks
