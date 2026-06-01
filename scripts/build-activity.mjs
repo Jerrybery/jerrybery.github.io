@@ -22,6 +22,7 @@ query($login:String!, $from:DateTime!, $to:DateTime!) {
   user(login: $login) {
     last30: contributionsCollection(from: $from, to: $to) {
       totalCommitContributions
+      restrictedContributionsCount
       contributionCalendar { weeks { contributionDays { contributionCount date } } }
       commitContributionsByRepository(maxRepositories: 25) {
         repository { name url isPrivate }
@@ -52,7 +53,9 @@ if (json.errors) {
 
 const user = json.data.user;
 const days30 = user.last30.contributionCalendar.weeks.flatMap((w) => w.contributionDays);
-const commits = user.last30.totalCommitContributions;
+// Private repos are never named by GitHub; they come back only as an anonymous count.
+const restricted = user.last30.restrictedContributionsCount || 0;
+const commits = user.last30.totalCommitContributions + restricted;
 const active_days = days30.filter((d) => d.contributionCount > 0).length;
 
 // streak: longest run of consecutive active days in the full-year calendar
@@ -75,30 +78,21 @@ const spark = user.year.contributionCalendar.weeks
   .slice(-26)
   .map((w) => w.contributionDays.reduce((a, d) => a + d.contributionCount, 0));
 
-// repos: public named (top N), private aggregated and never named
-const byRepo = user.last30.commitContributionsByRepository
+// repos: public ones are named (top N); private contributions are a single
+// anonymous aggregate (restrictedContributionsCount) — GitHub never reveals names.
+const repos = user.last30.commitContributionsByRepository
   .map((r) => ({
     name: r.repository.name,
     url: r.repository.url,
     count: r.contributions.totalCount,
     private: r.repository.isPrivate,
   }))
-  .filter((r) => r.count > 0);
-
-const repos = byRepo
-  .filter((r) => !r.private)
+  .filter((r) => r.count > 0 && !r.private)
   .sort((a, b) => b.count - a.count)
   .slice(0, MAX_PUBLIC_REPOS);
 
-const priv = byRepo.filter((r) => r.private);
-if (priv.length) {
-  repos.push({
-    name: "Private repos",
-    url: null,
-    count: priv.reduce((a, r) => a + r.count, 0),
-    private: true,
-    repo_count: priv.length,
-  });
+if (restricted > 0) {
+  repos.push({ name: "Private repos", url: null, count: restricted, private: true });
 }
 
 const out = {
