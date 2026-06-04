@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-03",
+  "generated_at": "2026-06-04",
   "window_days": 30,
-  "commits": 404,
-  "active_days": 19,
+  "commits": 113,
+  "active_days": 10,
   "streak_days": 4,
   "spark": [
     0,
@@ -25,20 +25,14 @@
     25,
     24,
     1,
-    47,
-    52,
-    132,
-    107,
-    130,
-    6
+    0,
+    34,
+    70,
+    12,
+    1,
+    0
   ],
   "repos": [
-    {
-      "name": "CyberG",
-      "url": "https://github.com/Jerrybery/CyberG",
-      "count": 130,
-      "private": false
-    },
     {
       "name": "orchestra-multiagent",
       "url": "https://github.com/Jerrybery/orchestra-multiagent",
@@ -48,7 +42,7 @@
     {
       "name": "Private repos",
       "url": null,
-      "count": 165,
+      "count": 4,
       "private": true
     }
   ]
