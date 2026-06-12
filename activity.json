@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-11",
+  "generated_at": "2026-06-12",
   "window_days": 30,
-  "commits": 64,
-  "active_days": 10,
+  "commits": 61,
+  "active_days": 9,
   "streak_days": 4,
   "spark": [
     1,
@@ -36,7 +36,7 @@
     {
       "name": "orchestra-multiagent",
       "url": "https://github.com/Jerrybery/orchestra-multiagent",
-      "count": 51,
+      "count": 48,
       "private": false
     },
     {
