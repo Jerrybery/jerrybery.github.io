@@ -1,0 +1,203 @@
+<!-- Paste this block before </body> in index.html -->
+
+<style>
+  .panel-overlay {
+    position: fixed; inset: 0;
+    z-index: 999;
+    background: rgba(13,17,19,.55);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+  }
+  .panel-overlay.active { opacity: 1; pointer-events: auto; }
+
+  .panel-clone {
+    position: fixed;
+    z-index: 1000;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--line, #d4dbe0);
+    border-radius: 12px;
+    box-shadow: 0 24px 70px rgba(0,0,0,.3);
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    will-change: top, left, width, height, opacity;
+    transition: top .5s cubic-bezier(.2,.7,.2,1),
+                left .5s cubic-bezier(.2,.7,.2,1),
+                width .5s cubic-bezier(.2,.7,.2,1),
+                height .5s cubic-bezier(.2,.7,.2,1),
+                border-radius .5s ease,
+                opacity .2s ease;
+  }
+  .panel-clone.active { opacity: 1; pointer-events: auto; }
+  .panel-clone iframe {
+    width: 100%; height: 100%;
+    border: 0;
+    opacity: 0;
+    transition: opacity .35s ease;
+    background: var(--bg-card, #fff);
+  }
+  .panel-clone.loaded iframe { opacity: 1; }
+  .panel-loader {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono, monospace);
+    font-size: .85rem;
+    color: var(--muted, #5a6670);
+    background: var(--bg-card, #fff);
+    opacity: 1;
+    transition: opacity .25s ease;
+  }
+  .panel-clone.loaded .panel-loader { opacity: 0; }
+  body.panel-open { overflow: hidden; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel-overlay, .panel-clone, .panel-clone iframe, .panel-loader { transition: none !important; }
+  }
+</style>
+
+<div class="panel-overlay" id="panel-overlay" aria-hidden="true"></div>
+<div class="panel-clone" id="panel-clone" aria-hidden="true">
+  <div class="panel-loader" id="panel-loader">Loading…</div>
+  <iframe id="panel-iframe" title="Project detail"></iframe>
+</div>
+
+<script>
+(function () {
+  var clone = document.getElementById('panel-clone');
+  var overlay = document.getElementById('panel-overlay');
+  var iframe = document.getElementById('panel-iframe');
+  var lastCard = null;
+  var openRect = null;
+  var isOpen = false;
+  var isAnimating = false;
+
+  function projectUrl(card) {
+    var name = card.getAttribute('data-project');
+    return name ? (name + '.html') : null;
+  }
+
+  function targetRect() {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var pad = vw < 600 ? 16 : 40;
+    var width = Math.min(840, vw - pad * 2);
+    var height = Math.min(900, vh - pad * 2);
+    return { top: (vh - height) / 2, left: (vw - width) / 2, width: width, height: height };
+  }
+
+  function scrollbarWidth() {
+    return window.innerWidth - document.documentElement.clientWidth;
+  }
+
+  function lockScroll() {
+    document.body.style.paddingRight = scrollbarWidth() + 'px';
+    document.body.classList.add('panel-open');
+  }
+
+  function unlockScroll() {
+    document.body.classList.remove('panel-open');
+    document.body.style.paddingRight = '';
+  }
+
+  function onceTransitionEnd(el, props, cb) {
+    function handler(e) {
+      if (props.indexOf(e.propertyName) === -1) return;
+      el.removeEventListener('transitionend', handler);
+      cb();
+    }
+    el.addEventListener('transitionend', handler);
+  }
+
+  function openPanel(card) {
+    if (isOpen || isAnimating) return;
+    var url = projectUrl(card);
+    if (!url) return;
+    isOpen = true;
+    isAnimating = true;
+    lastCard = card;
+    openRect = card.getBoundingClientRect();
+
+    lockScroll();
+    overlay.classList.add('active');
+
+    clone.style.top = openRect.top + 'px';
+    clone.style.left = openRect.left + 'px';
+    clone.style.width = openRect.width + 'px';
+    clone.style.height = openRect.height + 'px';
+    clone.style.borderRadius = '12px';
+    clone.classList.add('active');
+    clone.classList.remove('loaded', 'expanded');
+    iframe.removeAttribute('src');
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        var t = targetRect();
+        clone.style.top = t.top + 'px';
+        clone.style.left = t.left + 'px';
+        clone.style.width = t.width + 'px';
+        clone.style.height = t.height + 'px';
+        clone.style.borderRadius = '14px';
+        clone.classList.add('expanded');
+      });
+    });
+
+    onceTransitionEnd(clone, ['width', 'height'], function () {
+      isAnimating = false;
+      iframe.onload = function () {
+        clone.classList.add('loaded');
+        iframe.onload = null;
+      };
+      iframe.src = url + (url.indexOf('?') > -1 ? '&' : '?') + 'embed=1';
+    });
+  }
+
+  function closePanel() {
+    if (!isOpen || isAnimating || !lastCard || !openRect) return;
+    isAnimating = true;
+    clone.classList.remove('loaded', 'expanded');
+    iframe.onload = null;
+    iframe.removeAttribute('src');
+    overlay.classList.remove('active');
+
+    clone.style.top = openRect.top + 'px';
+    clone.style.left = openRect.left + 'px';
+    clone.style.width = openRect.width + 'px';
+    clone.style.height = openRect.height + 'px';
+    clone.style.borderRadius = '12px';
+
+    onceTransitionEnd(clone, ['width', 'height'], function () {
+      clone.classList.remove('active');
+      unlockScroll();
+      isOpen = false;
+      isAnimating = false;
+      lastCard = null;
+      openRect = null;
+    });
+  }
+
+  window.addEventListener('message', function (e) {
+    if (e.data === 'close-project-panel') closePanel();
+  });
+
+  document.querySelectorAll('.card[data-project]').forEach(function (card) {
+    var link = card.querySelector('h3 a');
+    if (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        openPanel(card);
+      });
+    }
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      openPanel(card);
+    });
+  });
+
+  overlay.addEventListener('click', closePanel);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && isOpen) closePanel();
+  });
+})();
+</script>
