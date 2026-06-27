@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page transition demos — pixel vs panel expand</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #eef1f3;
+      --bg-card:   #ffffff;
+      --text:      #14191c;
+      --muted:     #5a6670;
+      --line:      #d4dbe0;
+      --accent:    #0c8f7d;
+      --accent-2:  #5eead4;
+      --chip-bg:   #e2e8ec;
+      --shadow:    0 1px 2px rgba(20,25,28,.04), 0 8px 24px rgba(20,25,28,.06);
+      --display: "Bricolage Grotesque", Georgia, serif;
+      --body: "IBM Plex Sans", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0d1113;
+        --bg-card:   #161b1e;
+        --text:      #e4edf0;
+        --muted:     #8794a0;
+        --line:      #232b30;
+        --accent:    #2dd4bf;
+        --accent-2:  #5eead4;
+        --chip-bg:   #19211f;
+        --shadow:    0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      padding: 1.5rem;
+      line-height: 1.6;
+    }
+    h1 { font-family: var(--display); font-size: 1.6rem; margin-bottom: .3rem; }
+    .sub { color: var(--muted); margin-bottom: 1rem; }
+
+    .controls {
+      display: flex; flex-wrap: wrap; gap: .5rem;
+      margin-bottom: .6rem;
+    }
+    .controls button {
+      font-family: var(--mono);
+      font-size: .75rem;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: .45rem .75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .controls button:hover { border-color: var(--accent); }
+    .controls button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    .note { color: var(--muted); font-size: .8rem; margin-bottom: 1rem; min-height: 1.4em; }
+
+    .stage {
+      position: relative;
+      max-width: 860px;
+      height: 520px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: var(--shadow);
+    }
+    .page {
+      position: absolute; inset: 0;
+      padding: 1.5rem;
+      overflow-y: auto;
+      background: var(--bg-card);
+      z-index: 1;
+    }
+
+    /* home */
+    .home h2 {
+      font-family: var(--mono);
+      font-size: .8rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 4px 14px rgba(12,143,125,.10);
+    }
+    .card .fig {
+      height: 80px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      margin-bottom: .7rem;
+      background: var(--bg-card);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card .fig svg { width: 100%; height: 100%; }
+    .card h3 { font-family: var(--display); font-size: 1.1rem; margin-bottom: .2rem; }
+    .card p { color: var(--muted); font-size: .85rem; }
+
+    /* detail */
+    .detail {
+      opacity: 0;
+      pointer-events: none;
+      z-index: 3;
+      transition: opacity .35s ease;
+    }
+    .detail.active { opacity: 1; pointer-events: auto; }
+    .back {
+      font-family: var(--mono);
+      font-size: .8rem;
+      background: transparent;
+      border: 0;
+      color: var(--accent);
+      cursor: pointer;
+      margin-bottom: 1rem;
+      padding: .2rem 0;
+    }
+    .hero {
+      height: 150px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero svg { width: 100%; height: 100%; }
+    .detail h2 { font-family: var(--display); font-size: 1.6rem; margin-bottom: .5rem; }
+    .detail p { color: var(--muted); max-width: 60ch; margin-bottom: .8rem; }
+    .detail .tags, .panel-inner .tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .detail .tags span, .panel-inner .tags span {
+      font-family: var(--mono); font-size: .7rem;
+      background: var(--chip-bg); color: var(--muted);
+      padding: .25rem .55rem; border-radius: 5px; border: 1px solid var(--line);
+    }
+
+    /* ================= Pixel Dissolve ================= */
+    .pixel-mask {
+      position: absolute; inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: 1px;
+      opacity: 0;
+    }
+    .pixel-mask.show { opacity: 1; }
+    .pixel-mask span {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      opacity: 0;
+      transform: scale(.4);
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .pixel-mask.dissolve span {
+      opacity: 0;
+      transform: scale(.4);
+    }
+    .pixel-mask.assemble span {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ================= Panel Expand (FLIP) ================= */
+    .panel-clone {
+      position: absolute;
+      z-index: 20;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      pointer-events: none;
+      transition: transform .5s cubic-bezier(.2,.7,.2,1),
+                  top .5s cubic-bezier(.2,.7,.2,1),
+                  left .5s cubic-bezier(.2,.7,.2,1),
+                  width .5s cubic-bezier(.2,.7,.2,1),
+                  height .5s cubic-bezier(.2,.7,.2,1),
+                  border-radius .5s ease;
+    }
+    .panel-clone.expanded { pointer-events: auto; }
+    .panel-clone .panel-inner {
+      width: 100%; height: 100%;
+      opacity: 0;
+      transition: opacity .3s ease .25s;
+      padding: 1.2rem;
+      overflow-y: auto;
+    }
+    .panel-clone.expanded .panel-inner { opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page, .pixel-mask span, .panel-clone { transition: none !important; }
+      .panel-clone .panel-inner { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <h1>动效二选一：Pixel Dissolve vs Panel Expand</h1>
+  <p class="sub">点击卡片体验。可切模式。</p>
+
+  <div class="controls">
+    <button data-mode="pixel" class="active">1. Pixel Dissolve</button>
+    <button data-mode="panel">2. Panel Expand</button>
+  </div>
+  <p class="note" id="mode-note"></p>
+
+  <div class="stage mode-pixel" id="stage">
+    <div class="page home" id="home">
+      <h2>Projects</h2>
+      <div class="grid">
+        <div class="card" data-target="cyborg">
+          <div class="fig" id="card-fig-cyborg">
+            <svg viewBox="0 0 300 116" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="20" y="20" width="10" height="76" rx="5" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.5"/>
+              <rect x="22" y="36" width="6" height="58" rx="3" fill="var(--accent)" opacity="0.6"/>
+              <circle cx="25" cy="90" r="5" fill="var(--accent)"/>
+              <text x="38" y="58" fill="var(--muted)" font-size="7" font-family="IBM Plex Mono, ui-monospace, monospace">drift</text>
+              <circle cx="110" cy="40" r="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="150" cy="58" r="6" fill="var(--accent)" opacity="0.3" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="190" cy="36" r="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="170" cy="82" r="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="130" cy="78" r="6" fill="var(--accent)" opacity="0.5" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="210" cy="58" r="6" fill="var(--accent)" opacity="0.2" stroke="var(--accent)" stroke-width="1.8"/>
+              <line x1="110" y1="40" x2="150" y2="58" stroke="var(--line)" stroke-width="1"/>
+              <line x1="150" y1="58" x2="190" y2="36" stroke="var(--line)" stroke-width="1"/>
+              <line x1="150" y1="58" x2="170" y2="82" stroke="var(--line)" stroke-width="1"/>
+              <line x1="130" y1="78" x2="170" y2="82" stroke="var(--line)" stroke-width="1"/>
+              <circle cx="150" cy="58" r="18" stroke="var(--accent-2)" stroke-width="1" opacity="0.4" fill="none"/>
+              <rect x="96" y="52" width="18" height="8" rx="2" fill="var(--chip-bg)" stroke="var(--line)" stroke-width="0.5"/>
+              <text x="98" y="58" fill="var(--muted)" font-size="5" font-family="IBM Plex Mono, ui-monospace, monospace">user</text>
+            </svg>
+          </div>
+          <h3>Cyborg</h3>
+          <p>Multi-user household AI agent with tagged memory.</p>
+        </div>
+
+        <div class="card" data-target="hmi">
+          <div class="fig" id="card-fig-hmi">
+            <svg viewBox="0 0 300 116" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="34" y="80" width="32" height="10" rx="3" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+              <path d="M50 80 V58 L74 44 L94 58" stroke="var(--accent)" stroke-width="2.5"/>
+              <circle cx="50" cy="58" r="3.5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.6"/>
+              <circle cx="74" cy="44" r="3.5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.6"/>
+              <path d="M94 58 L108 50 M94 58 L108 66" stroke="var(--accent-2)" stroke-width="2"/>
+              <path d="M108 52 Q138 34 168 50" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="4 3" fill="none"/>
+              <rect x="186" y="28" width="78" height="60" rx="6" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.5"/>
+              <circle cx="210" cy="48" r="5" fill="var(--accent)" opacity=".28"/>
+              <path d="M224 60 L230 48 L236 56 L242 44 L248 54" stroke="var(--accent)" stroke-width="1.8" fill="none"/>
+              <text x="225" y="84" fill="var(--muted)" font-size="7" font-family="IBM Plex Mono, ui-monospace, monospace">gesture</text>
+            </svg>
+          </div>
+          <h3>HMI Manipulation Demo</h3>
+          <p>Gesture-controlled UR5e simulation in MuJoCo.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page detail" id="detail">
+      <button class="back" id="back">← Back to projects</button>
+      <div class="hero" id="detail-hero"></div>
+      <h2 id="detail-title"></h2>
+      <p id="detail-desc"></p>
+      <div class="tags" id="detail-tags"></div>
+    </div>
+
+    <div class="pixel-mask" id="pixel-mask"></div>
+  </div>
+
+  <script>
+    const stage = document.getElementById('stage');
+    const home = document.getElementById('home');
+    const detail = document.getElementById('detail');
+    const detailHero = document.getElementById('detail-hero');
+    const detailTitle = document.getElementById('detail-title');
+    const detailDesc = document.getElementById('detail-desc');
+    const detailTags = document.getElementById('detail-tags');
+    const back = document.getElementById('back');
+    const modeNote = document.getElementById('mode-note');
+    const pixelMask = document.getElementById('pixel-mask');
+    const buttons = document.querySelectorAll('.controls button');
+
+    let mode = 'pixel';
+    let isOpen = false;
+    let panelClone = null;
+    let lastCard = null;
+
+    const notes = {
+      pixel: 'Pixel Dissolve：网格方块先聚合再消散，露出详情页。',
+      panel: 'Panel Expand：卡片平滑放大到 stage 中央的大面板，内嵌详情内容。'
+    };
+
+    const data = {
+      cyborg: {
+        title: 'Cyborg',
+        desc: 'A household AI agent built on a six-layer memory hierarchy. It uses an information-drift and scene-change aware temperature system to decide when to run Dream consolidation, and tags memory files so Dreaming can update the right files efficiently.',
+        tags: ['tagged memory', 'Dream engine', 'Multi-user'],
+        fig: document.getElementById('card-fig-cyborg').innerHTML
+      },
+      hmi: {
+        title: 'HMI Manipulation Demo',
+        desc: 'A closed-loop MuJoCo simulation of a UR5e arm with a Robotiq 2F-85 gripper, controlled through real-time hand-gesture arbitration from a webcam. It triggers task sequences and renders a predictive trajectory preview.',
+        tags: ['Robotics', 'MuJoCo', 'HMI', 'Computer Vision'],
+        fig: document.getElementById('card-fig-hmi').innerHTML
+      }
+    };
+
+    // build pixel cells
+    for (let i = 0; i < 128; i++) {
+      pixelMask.appendChild(document.createElement('span'));
+    }
+
+    function setMode(m) {
+      mode = m;
+      stage.className = 'stage mode-' + m;
+      buttons.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+      modeNote.textContent = notes[m];
+      if (isOpen) closeDetail();
+    }
+    buttons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    setMode('pixel');
+
+    function fillDetail(key) {
+      const d = data[key];
+      detailHero.innerHTML = '<svg viewBox="0 0 300 150" fill="none" stroke-linecap="round" stroke-linejoin="round">' + d.fig + '</svg>';
+      detailTitle.textContent = d.title;
+      detailDesc.textContent = d.desc;
+      detailTags.innerHTML = d.tags.map(t => '<span>' + t + '</span>').join('');
+    }
+
+    function shufflePixels(reverse) {
+      const cells = Array.from(pixelMask.children);
+      cells.forEach((c, i) => {
+        const row = Math.floor(i / 16);
+        const col = i % 16;
+        const dist = Math.sqrt(Math.pow(row - 3.5, 2) + Math.pow(col - 7.5, 2));
+        const base = reverse ? (10 - dist) / 10 : dist / 10;
+        c.style.transitionDelay = (Math.max(0, Math.min(1, base)) * 0.4 + Math.random() * 0.1).toFixed(3) + 's';
+      });
+    }
+
+    function openPixel(key) {
+      isOpen = true;
+      fillDetail(key);
+      detail.classList.add('active');
+      pixelMask.classList.add('show', 'assemble');
+      pixelMask.classList.remove('dissolve');
+      shufflePixels(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          pixelMask.classList.remove('assemble');
+          pixelMask.classList.add('dissolve');
+        });
+      });
+    }
+
+    function closePixel() {
+      pixelMask.classList.remove('dissolve');
+      pixelMask.classList.add('assemble');
+      shufflePixels(true);
+      setTimeout(() => {
+        detail.classList.remove('active');
+        pixelMask.classList.remove('show', 'assemble');
+        isOpen = false;
+      }, 520);
+    }
+
+    function openPanel(card, key) {
+      isOpen = true;
+      lastCard = card;
+      fillDetail(key);
+
+      const cardRect = card.getBoundingClientRect();
+      const stageRect = stage.getBoundingClientRect();
+
+      panelClone = document.createElement('div');
+      panelClone.className = 'panel-clone';
+      panelClone.style.left = (cardRect.left - stageRect.left) + 'px';
+      panelClone.style.top = (cardRect.top - stageRect.top) + 'px';
+      panelClone.style.width = cardRect.width + 'px';
+      panelClone.style.height = cardRect.height + 'px';
+      panelClone.style.borderRadius = '10px';
+
+      const inner = document.createElement('div');
+      inner.className = 'panel-inner';
+      inner.innerHTML = detail.innerHTML;
+      panelClone.appendChild(inner);
+      stage.appendChild(panelClone);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const pad = 32;
+          panelClone.style.left = pad + 'px';
+          panelClone.style.top = pad + 'px';
+          panelClone.style.width = (stageRect.width - pad * 2) + 'px';
+          panelClone.style.height = (stageRect.height - pad * 2) + 'px';
+          panelClone.style.borderRadius = '14px';
+          panelClone.classList.add('expanded');
+        });
+      });
+    }
+
+    function closePanel() {
+      if (!panelClone || !lastCard) return;
+      const cardRect = lastCard.getBoundingClientRect();
+      const stageRect = stage.getBoundingClientRect();
+      panelClone.classList.remove('expanded');
+      panelClone.style.left = (cardRect.left - stageRect.left) + 'px';
+      panelClone.style.top = (cardRect.top - stageRect.top) + 'px';
+      panelClone.style.width = cardRect.width + 'px';
+      panelClone.style.height = cardRect.height + 'px';
+      panelClone.style.borderRadius = '10px';
+      setTimeout(() => {
+        if (panelClone) { panelClone.remove(); panelClone = null; }
+        isOpen = false;
+        lastCard = null;
+      }, 520);
+    }
+
+    function openDetail(key, card) {
+      if (mode === 'pixel') openPixel(key);
+      else openPanel(card, key);
+    }
+
+    function closeDetail() {
+      if (mode === 'pixel') closePixel();
+      else closePanel();
+    }
+
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => openDetail(card.dataset.target, card));
+    });
+    back.addEventListener('click', closeDetail);
+    stage.addEventListener('click', (e) => {
+      if (e.target.closest('.back')) closeDetail();
+    });
+  </script>
+</body>
+</html>
