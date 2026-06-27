@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HMI Manipulation Demo — Jierui Liu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A closed-loop MuJoCo simulation of a UR5e robotic arm with MediaPipe gesture arbitration.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:        #eef1f3;
+      --bg-card:   #ffffff;
+      --text:      #14191c;
+      --muted:     #5a6670;
+      --line:      #d4dbe0;
+      --accent:    #0c8f7d;
+      --accent-2:  #0a7464;
+      --chip-bg:   #e2e8ec;
+      --shadow:    0 1px 2px rgba(20,25,28,.04), 0 8px 24px rgba(20,25,28,.06);
+      --display: "Bricolage Grotesque", Georgia, serif;
+      --body: "IBM Plex Sans", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0d1113;
+        --bg-card:   #161b1e;
+        --text:      #e4edf0;
+        --muted:     #8794a0;
+        --line:      #232b30;
+        --accent:    #2dd4bf;
+        --accent-2:  #5eead4;
+        --chip-bg:   #19211f;
+        --shadow:    0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+      background-image: radial-gradient(var(--line) .5px, transparent .5px);
+      background-size: 22px 22px;
+      background-position: -11px -11px;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
+
+    .wrap { max-width: 780px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* nav */
+    nav {
+      padding: 1.5rem 0 1rem;
+      font-family: var(--mono);
+      font-size: .85rem;
+    }
+    nav a { display: inline-flex; align-items: center; gap: .4rem; }
+
+    /* hero */
+    header {
+      padding: 0 0 3.5rem;
+    }
+    .hero-text { margin-bottom: 1.75rem; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: .75rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    h1 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      margin-bottom: .75rem;
+    }
+    .lead {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 55ch;
+      margin-bottom: 1rem;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 1.2rem;
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--muted);
+    }
+    .meta span { display: inline-flex; align-items: center; gap: .45rem; }
+    .meta-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .hero-media {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: var(--shadow);
+    }
+    .hero-media video,
+    .hero-media img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #000;
+    }
+
+    /* video controls */
+    .vctrl {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      padding: .7rem 1rem;
+      background: var(--bg-card);
+      border-top: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .vctrl button {
+      background: transparent;
+      border: 0;
+      color: var(--text);
+      cursor: pointer;
+      font-size: .9rem;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px;
+      transition: background .15s;
+    }
+    .vctrl button:hover { background: var(--chip-bg); }
+    .vctrl .seek {
+      flex: 1;
+      position: relative;
+      height: 18px;
+      display: flex; align-items: center;
+      cursor: pointer;
+    }
+    .vctrl .track {
+      width: 100%; height: 4px;
+      background: var(--chip-bg);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .vctrl .fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .vctrl .thumb {
+      position: absolute;
+      left: 0%;
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, 0);
+      opacity: 0;
+      transition: opacity .15s, transform .15s;
+    }
+    .vctrl .seek:hover .thumb,
+    .vctrl .seek.dragging .thumb { opacity: 1; transform: translate(-50%, 0) scale(1.2); }
+    .vctrl .time { min-width: 6ch; text-align: right; }
+
+    /* sections */
+    main { padding: 2rem 0 3rem; }
+    section { padding: 2.8rem 0; border-bottom: 1px solid var(--line); }
+    section:last-of-type { border-bottom: 0; }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    h2::before {
+      content: "";
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: .5rem;
+    }
+    p { color: var(--muted); margin-bottom: 1rem; }
+    p strong { color: var(--text); font-weight: 600; }
+
+    .features { display: grid; gap: 1.1rem; }
+    .feature {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      box-shadow: var(--shadow);
+    }
+    .feature p { margin-bottom: 0; font-size: .95rem; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .chips span {
+      font-family: var(--mono);
+      font-size: .78rem;
+      background: var(--chip-bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: .3rem .65rem;
+      border-radius: 6px;
+    }
+
+    .arch {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.4rem;
+      font-family: var(--mono);
+      font-size: .82rem;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    .arch pre { color: var(--muted); line-height: 1.6; }
+
+    .highlights { list-style: none; }
+    .highlights li {
+      position: relative;
+      padding-left: 1.3rem;
+      margin-bottom: .8rem;
+      color: var(--muted);
+    }
+    .highlights li::before {
+      content: "›";
+      position: absolute; left: 0; top: -.05em;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+    }
+    .highlights li strong { color: var(--text); font-weight: 600; }
+
+    .super-link {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: .3rem;
+    }
+    .super-link:hover { color: var(--accent); text-decoration: none; }
+    .super-link span { color: var(--accent); }
+
+    footer {
+      padding: 2.5rem 0 3rem;
+      font-family: var(--mono);
+      font-size: .74rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+  <style>
+    .embed nav { display: block; padding: 1.25rem 0 1rem; }
+    .embed nav a { cursor: pointer; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-family: var(--mono);
+      font-size: .82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      color: var(--accent);
+      padding: .5rem .85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .back-btn:hover { border-color: var(--accent); background: var(--chip-bg); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav class="wrap">
+    <a class="back-btn" href="index.html" onclick="event.preventDefault(); if (window.parent !== window) window.parent.postMessage('close-project-panel', '*'); else location.href = 'index.html';">← Back to projects</a>
+  </nav>
+
+  <header class="wrap">
+    <div class="hero-text">
+      <p class="eyebrow">Human-Machine Interaction</p>
+      <h1>HMI Manipulation Demo</h1>
+      <p class="lead">
+        A closed-loop simulation of a UR5e robotic arm with a Robotiq 2F-85 gripper in
+        <strong>MuJoCo</strong>, controlled through real-time
+        <strong>MediaPipe</strong> hand-gesture arbitration from a webcam.
+      </p>
+      <div class="meta">
+        <span><span class="meta-dot"></span> UR5e + Robotiq 2F-85</span>
+        <span><span class="meta-dot"></span> Open-palm / closed-fist</span>
+        <span><span class="meta-dot"></span> Claude Code built</span>
+      </div>
+    </div>
+
+    <div class="hero-media">
+      <video id="hero-vid" autoplay muted loop playsinline poster="img/hmi/img-hmi.jpg">
+        <source src="img/hmi/video.mp4" type="video/mp4">
+        <img src="img/hmi/img-hmi.jpg" alt="UR5e simulation with trajectory preview">
+      </video>
+      <div class="vctrl">
+        <button id="vplay" aria-label="play/pause">▶</button>
+        <div class="seek" id="vseek">
+          <div class="track"><div class="fill" id="vfill"></div></div>
+          <div class="thumb" id="vthumb"></div>
+        </div>
+        <span class="time" id="vtime">0:00</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>
+        This demo runs entirely on a single macOS laptop: a physics-backed UR5e arm tracks a circular
+        trajectory above a table while a webcam watches your hand. An open-palm gesture triggers an
+        unload sequence, a closed-fist resumes operation, and the predicted path is rendered as a
+        green-to-yellow trail 2 seconds ahead.
+      </p>
+      <p>
+        The whole project — simulation, vision pipeline, state machine, PyQt6 GUI, and tests — was
+        built with <strong>Claude Code</strong> as the primary development partner, using conventional
+        commits and pytest from day one.
+      </p>
+    </section>
+
+    <section id="features">
+      <h2>Key Features</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>Circular trajectory tracking</h3>
+          <p>End-effector draws a 15 cm radius circle at 0.3 m height using damped least-squares differential IK with a fixed downward orientation.</p>
+        </div>
+        <div class="feature">
+          <h3>2-second trajectory preview</h3>
+          <p>Twenty semi-transparent spheres show the predicted path ahead of the arm, making the robot's immediate intent visible to the operator.</p>
+        </div>
+        <div class="feature">
+          <h3>MediaPipe gesture arbitration</h3>
+          <p>Open-palm latches an unload-and-return sequence; closed-fist resumes from IDLE. A 5-frame hysteresis filter keeps noisy detections from flipping the state.</p>
+        </div>
+        <div class="feature">
+          <h3>State machine + safety</h3>
+          <p>RUNNING → UNLOADING → RETURNING_HOME → IDLE, with an independent Esc emergency-stop channel that freezes the state machine instantly.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2>Tech Stack</h2>
+      <p class="chips">
+        <span>Python 3.12</span>
+        <span>MuJoCo</span>
+        <span>mujoco_menagerie</span>
+        <span>MediaPipe Hands</span>
+        <span>OpenCV</span>
+        <span>PyQt6</span>
+        <span>NumPy</span>
+        <span>PyYAML</span>
+        <span>pytest</span>
+      </p>
+    </section>
+
+    <section id="highlights">
+      <h2>Implementation Highlights</h2>
+      <ul class="highlights">
+        <li><strong>MjSpec assembly:</strong> UR5e and Robotiq 2F-85 are merged into a single nq=12, nu=7 model at runtime via the Python MjSpec API.</li>
+        <li><strong>Damped least-squares IK:</strong> Pure NumPy Jacobian pseudoinverse controls position while keeping the gripper pointing downward.</li>
+        <li><strong>Hysteresis filtering:</strong> 5-frame debounce (~165 ms) prevents gesture jitter from interrupting the task.</li>
+        <li><strong>Off-screen rendering:</strong> MuJoCo's renderer is fed through a numpy-to-QImage adapter for the live simulation view.</li>
+        <li><strong>Config-driven:</strong> Trajectory, IK, gripper, camera, gesture, and UI parameters are all tunable in <code>configs/demo.yaml</code>.</li>
+      </ul>
+    </section>
+
+    <section id="links">
+      <h2>Links</h2>
+      <p>Full source, install instructions, and configuration are on GitHub.</p>
+      <a class="super-link" href="https://github.com/Jerrybery/hmi-manipulation-demo" target="_blank" rel="noopener">
+        github.com/Jerrybery/hmi-manipulation-demo <span>↗</span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    © 2026 Jierui Liu — built with plain HTML/CSS.
+  </footer>
+
+  <script>
+    if (location.search.includes('embed=1')) document.body.classList.add('embed');
+
+    (function () {
+      const video = document.getElementById('hero-vid');
+      const playBtn = document.getElementById('vplay');
+      const seek = document.getElementById('vseek');
+      const fill = document.getElementById('vfill');
+      const thumb = document.getElementById('vthumb');
+      const time = document.getElementById('vtime');
+      if (!video) return;
+
+      function fmt(t) {
+        if (!isFinite(t)) return '0:00';
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60).toString().padStart(2, '0');
+        return m + ':' + s;
+      }
+
+      function update() {
+        const pct = video.duration ? (video.currentTime / video.duration) * 100 : 0;
+        fill.style.width = pct + '%';
+        thumb.style.left = pct + '%';
+        time.textContent = fmt(video.currentTime);
+        playBtn.textContent = video.paused ? '▶' : '⏸';
+      }
+
+      function seekTo(clientX) {
+        const rect = seek.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        video.currentTime = ratio * (video.duration || 0);
+      }
+
+      playBtn.addEventListener('click', () => {
+        if (video.paused) video.play(); else video.pause();
+      });
+      video.addEventListener('play', update);
+      video.addEventListener('pause', update);
+      video.addEventListener('timeupdate', update);
+      video.addEventListener('loadedmetadata', update);
+
+      let dragging = false;
+      seek.addEventListener('pointerdown', (e) => {
+        dragging = true;
+        seek.classList.add('dragging');
+        seekTo(e.clientX);
+        seek.setPointerCapture(e.pointerId);
+      });
+      seek.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        e.preventDefault();
+        seekTo(e.clientX);
+      });
+      seek.addEventListener('pointerup', (e) => {
+        dragging = false;
+        seek.classList.remove('dragging');
+        seek.releasePointerCapture(e.pointerId);
+      });
+    })();
+  </script>
+</body>
+</html>
