@@ -372,6 +372,67 @@
       border-top: 1px solid var(--line);
     }
 
+    /* ---------- Project panel (FLIP expand) ---------- */
+    .panel-overlay {
+      position: fixed; inset: 0;
+      z-index: 999;
+      background: rgba(13,17,19,.55);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s ease;
+    }
+    .panel-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .panel-clone {
+      position: fixed;
+      z-index: 1000;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.3);
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      will-change: top, left, width, height, opacity;
+      transition: top .5s cubic-bezier(.2,.7,.2,1),
+                  left .5s cubic-bezier(.2,.7,.2,1),
+                  width .5s cubic-bezier(.2,.7,.2,1),
+                  height .5s cubic-bezier(.2,.7,.2,1),
+                  border-radius .5s ease,
+                  opacity .2s ease;
+    }
+    .panel-clone.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .panel-clone iframe {
+      width: 100%; height: 100%;
+      border: 0;
+      opacity: 0;
+      transition: opacity .35s ease;
+      background: var(--bg-card);
+    }
+    .panel-clone.loaded iframe { opacity: 1; }
+    .panel-loader {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono);
+      font-size: .85rem;
+      color: var(--muted);
+      opacity: 1;
+      transition: opacity .25s ease;
+      pointer-events: none;
+      background: var(--bg-card);
+    }
+    .panel-clone.loaded .panel-loader { opacity: 0; }
+
+    body.panel-open { overflow: hidden; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .panel-overlay, .panel-clone, .panel-clone iframe { transition: none !important; }
+    }
+
     /* ---------- Load reveal ---------- */
     .reveal { opacity: 0; transform: translateY(14px); animation: rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
     @keyframes rise { to { opacity: 1; transform: none; } }
@@ -499,37 +560,76 @@
 
         <li class="card">
           <div class="card-figure">
-            <svg viewBox="0 0 300 116" aria-hidden="true" font-family="IBM Plex Mono, ui-monospace, monospace">
-              <g fill="var(--muted)" font-size="9">
-                <text x="26" y="16">L1</text><text x="26" y="34">L2</text><text x="26" y="52">L3</text>
-                <text x="26" y="70">L4</text><text x="26" y="88">L5</text><text x="26" y="106">L6</text>
-              </g>
-              <g fill="var(--accent)">
-                <rect x="60" y="6"  width="180" height="13" rx="3" opacity=".28"/>
-                <rect x="60" y="24" width="180" height="13" rx="3" opacity=".42"/>
-                <rect x="60" y="42" width="180" height="13" rx="3" opacity=".55"/>
-                <rect x="60" y="60" width="180" height="13" rx="3" opacity=".68"/>
-                <rect x="60" y="78" width="180" height="13" rx="3" opacity=".82"/>
-                <rect x="60" y="96" width="180" height="13" rx="3" opacity="1"/>
-              </g>
-              <text x="150" y="105.5" fill="#fff" font-size="8.5" text-anchor="middle" font-weight="600" font-family="IBM Plex Mono, ui-monospace, monospace">DREAM</text>
+            <svg viewBox="0 0 300 116" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="20" y="20" width="10" height="76" rx="5" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.5"/>
+              <rect x="22" y="36" width="6" height="58" rx="3" fill="var(--accent)" opacity="0.6"/>
+              <circle cx="25" cy="90" r="5" fill="var(--accent)"/>
+              <text x="38" y="58" fill="var(--muted)" font-size="7" font-family="IBM Plex Mono, ui-monospace, monospace">drift</text>
+
+              <circle cx="110" cy="40" r="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="150" cy="58" r="6" fill="var(--accent)" opacity="0.3" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="190" cy="36" r="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="170" cy="82" r="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="130" cy="78" r="6" fill="var(--accent)" opacity="0.5" stroke="var(--accent)" stroke-width="1.8"/>
+              <circle cx="210" cy="58" r="6" fill="var(--accent)" opacity="0.2" stroke="var(--accent)" stroke-width="1.8"/>
+
+              <line x1="110" y1="40" x2="150" y2="58" stroke="var(--line)" stroke-width="1"/>
+              <line x1="150" y1="58" x2="190" y2="36" stroke="var(--line)" stroke-width="1"/>
+              <line x1="150" y1="58" x2="170" y2="82" stroke="var(--line)" stroke-width="1"/>
+              <line x1="130" y1="78" x2="170" y2="82" stroke="var(--line)" stroke-width="1"/>
+
+              <circle cx="150" cy="58" r="18" stroke="var(--accent-2)" stroke-width="1" opacity="0.4" fill="none"/>
+              <circle cx="150" cy="58" r="26" stroke="var(--accent-2)" stroke-width="0.8" opacity="0.2" fill="none"/>
+
+              <rect x="96" y="52" width="18" height="8" rx="2" fill="var(--chip-bg)" stroke="var(--line)" stroke-width="0.5"/>
+              <text x="98" y="58" fill="var(--muted)" font-size="5" font-family="IBM Plex Mono, ui-monospace, monospace">user</text>
+              <rect x="178" y="30" width="18" height="8" rx="2" fill="var(--chip-bg)" stroke="var(--line)" stroke-width="0.5"/>
+              <text x="180" y="36" fill="var(--muted)" font-size="5" font-family="IBM Plex Mono, ui-monospace, monospace">time</text>
             </svg>
           </div>
           <div class="card-top">
-            <h3><a href="https://github.com/Jerrybery/CyberG" target="_blank" rel="noopener">CyberG</a></h3>
+            <h3><a href="https://github.com/Jerrybery/cyborg" target="_blank" rel="noopener">Cyborg</a></h3>
             <span class="when">May 2026 –</span>
           </div>
           <p class="role-tag">Multi-user household AI agent</p>
           <p class="desc">
-            A family-oriented agent built on a <strong>six-layer memory hierarchy (L1–L6)</strong> — from rule-level
-            instructions and session context, up through working memory, a daily diary, a long-term store, and a nightly
-            <strong>Dream consolidation</strong>. Each member gets their own session, and it flags contradictory facts
-            across the family.
+            A household AI agent built on a <strong>six-layer memory hierarchy (L1–L6)</strong>. It uses an
+            information-drift and scene-change aware <strong>temperature system</strong> to decide when to run Dream
+            consolidation, cutting token costs, and <strong>tags memory files</strong> so Dreaming can trace hierarchical
+            relationships and update the right files efficiently.
           </p>
-          <p class="tags"><span>L1–L6 memory</span><span>Dream engine</span><span>Multi-user</span></p>
+          <p class="tags"><span>tagged memory</span><span>Dream engine</span><span>Multi-user</span></p>
         </li>
 
-        <li class="card">
+        <li class="card" data-project="hmi">
+          <div class="card-figure">
+            <svg viewBox="0 0 300 116" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="34" y="80" width="32" height="10" rx="3" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+              <path d="M50 80 V58 L74 44 L94 58" stroke="var(--accent)" stroke-width="2.5"/>
+              <circle cx="50" cy="58" r="3.5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.6"/>
+              <circle cx="74" cy="44" r="3.5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.6"/>
+              <path d="M94 58 L108 50 M94 58 L108 66" stroke="var(--accent-2)" stroke-width="2"/>
+              <path d="M108 52 Q138 34 168 50" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="4 3" fill="none"/>
+              <rect x="186" y="28" width="78" height="60" rx="6" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.5"/>
+              <circle cx="210" cy="48" r="5" fill="var(--accent)" opacity=".28"/>
+              <path d="M224 60 L230 48 L236 56 L242 44 L248 54" stroke="var(--accent)" stroke-width="1.8" fill="none"/>
+              <text x="225" y="84" fill="var(--muted)" font-size="7" font-family="IBM Plex Mono, ui-monospace, monospace">gesture</text>
+            </svg>
+          </div>
+          <div class="card-top">
+            <h3><a href="https://github.com/Jerrybery/hmi-manipulation-demo" target="_blank" rel="noopener">HMI Manipulation Demo</a></h3>
+            <span class="when">2026</span>
+          </div>
+          <p class="role-tag">Robotics · human-machine interaction</p>
+          <p class="desc">
+            A closed-loop MuJoCo simulation of a UR5e arm with a Robotiq 2F-85 gripper, controlled through real-time
+            hand-gesture arbitration from a webcam. It triggers task sequences and renders a predictive 2-second
+            trajectory preview.
+          </p>
+          <p class="tags"><span>Robotics</span><span>MuJoCo</span><span>HMI</span><span>Computer Vision</span></p>
+        </li>
+
+        <li class="card" data-project="orcahand">
           <div class="card-figure">
             <img src="img/orcahand/assembly.jpg" alt="Orca Hand assembly">
           </div>
@@ -548,10 +648,8 @@
             <summary>Explore more</summary>
             <p>
               Based on the open-source Orca Hand. We redesigned the finger structure to fit Feetech servos, 3D-printed the parts,
-              and adapted the original control software to our hardware. On top of that I built a CV system that captures hand
-              movements and translates them into commands for the hand — see
-              <a href="https://github.com/Jerrybery/V4D" target="_blank" rel="noopener">V4D (Vision for Dexterous action)</a> on GitHub.
-              <del>Though it can be called half-made… it still worked somehow.</del>
+              and adapted the original control software to our hardware, aligning the protocol and register map so existing
+              scripts work with minimal changes.
             </p>
             <img class="explore-img" src="img/orcahand/servo.jpg" alt="Feetech servo close-up">
           </details>
@@ -639,6 +737,12 @@
     © <span id="year"></span> Jierui Liu — built with plain HTML/CSS, hosted on GitHub Pages.
   </footer>
 
+  <div class="panel-overlay" id="panel-overlay" aria-hidden="true"></div>
+  <div class="panel-clone" id="panel-clone" aria-hidden="true">
+    <div class="panel-loader" id="panel-loader">Loading…</div>
+    <iframe id="panel-iframe" title="Project detail"></iframe>
+  </div>
+
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -648,7 +752,7 @@
         window_days: 30, commits: 402, active_days: 17, streak_days: 4,
         spark: [0,1,0,0,0,0,4,1,0,3,23,24,3,15,9,17,14,25,24,1,47,52,132,107,130,0],
         repos: [
-          { name: "CyberG", url: "https://github.com/Jerrybery/CyberG", count: 128, private: false },
+          { name: "cyborg", url: "https://github.com/Jerrybery/cyborg", count: 128, private: false },
           { name: "orchestra-multiagent", url: "https://github.com/Jerrybery/orchestra-multiagent", count: 109, private: false },
           { name: "Private repos", url: null, count: 165, private: true }
         ]
@@ -696,6 +800,158 @@
         .then(function (r) { if (!r.ok) throw 0; return r.json(); })
         .then(render)
         .catch(function () { render(FALLBACK); });
+    })();
+
+    // ---- Project panel expand (FLIP) ----
+    (function () {
+      var clone = document.getElementById('panel-clone');
+      var overlay = document.getElementById('panel-overlay');
+      var iframe = document.getElementById('panel-iframe');
+      var lastCard = null;
+      var openRect = null;
+      var isOpen = false;
+      var isAnimating = false;
+      var loadHandler = null;
+      var scrollBarWidth = 0;
+
+      function projectUrl(card) {
+        var name = card.getAttribute('data-project');
+        return name ? (name + '.html') : null;
+      }
+
+      function targetRect() {
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var pad = vw < 600 ? 16 : 40;
+        var width = Math.min(840, vw - pad * 2);
+        var height = Math.min(900, vh - pad * 2);
+        return {
+          top: (vh - height) / 2,
+          left: (vw - width) / 2,
+          width: width,
+          height: height
+        };
+      }
+
+      function getScrollbarWidth() {
+        return window.innerWidth - document.documentElement.clientWidth;
+      }
+
+      function lockScroll() {
+        scrollBarWidth = getScrollbarWidth();
+        document.body.style.paddingRight = scrollBarWidth + 'px';
+        document.body.classList.add('panel-open');
+      }
+
+      function unlockScroll() {
+        document.body.classList.remove('panel-open');
+        document.body.style.paddingRight = '';
+      }
+
+      function onExpandEnd(callback) {
+        function handler(e) {
+          if (e.propertyName !== 'width' && e.propertyName !== 'height') return;
+          clone.removeEventListener('transitionend', handler);
+          callback();
+        }
+        clone.addEventListener('transitionend', handler);
+      }
+
+      function openPanel(card) {
+        if (isOpen || isAnimating) return;
+        var url = projectUrl(card);
+        if (!url) return;
+        isOpen = true;
+        isAnimating = true;
+        lastCard = card;
+        openRect = card.getBoundingClientRect();
+
+        lockScroll();
+        overlay.classList.add('active');
+
+        clone.style.top = openRect.top + 'px';
+        clone.style.left = openRect.left + 'px';
+        clone.style.width = openRect.width + 'px';
+        clone.style.height = openRect.height + 'px';
+        clone.style.borderRadius = '12px';
+        clone.classList.add('active');
+        clone.classList.remove('loaded', 'expanded');
+        iframe.removeAttribute('src');
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            var t = targetRect();
+            clone.style.top = t.top + 'px';
+            clone.style.left = t.left + 'px';
+            clone.style.width = t.width + 'px';
+            clone.style.height = t.height + 'px';
+            clone.style.borderRadius = '14px';
+            clone.classList.add('expanded');
+          });
+        });
+
+        onExpandEnd(function () {
+          isAnimating = false;
+          loadHandler = function () {
+            clone.classList.add('loaded');
+            iframe.onload = null;
+            loadHandler = null;
+          };
+          iframe.onload = loadHandler;
+          iframe.src = url + (url.indexOf('?') > -1 ? '&' : '?') + 'embed=1';
+        });
+      }
+
+      function closePanel() {
+        if (!isOpen || isAnimating || !lastCard || !openRect) return;
+        isAnimating = true;
+        clone.classList.remove('loaded', 'expanded');
+        if (loadHandler) { iframe.onload = null; loadHandler = null; }
+        iframe.removeAttribute('src');
+        overlay.classList.remove('active');
+
+        clone.style.top = openRect.top + 'px';
+        clone.style.left = openRect.left + 'px';
+        clone.style.width = openRect.width + 'px';
+        clone.style.height = openRect.height + 'px';
+        clone.style.borderRadius = '12px';
+
+        function onCollapseEnd(e) {
+          if (e.propertyName !== 'width' && e.propertyName !== 'height') return;
+          clone.removeEventListener('transitionend', onCollapseEnd);
+          clone.classList.remove('active');
+          unlockScroll();
+          isOpen = false;
+          isAnimating = false;
+          lastCard = null;
+          openRect = null;
+        }
+        clone.addEventListener('transitionend', onCollapseEnd);
+      }
+
+      window.closeProjectPanel = closePanel;
+      window.addEventListener('message', function (e) {
+        if (e.data === 'close-project-panel') closePanel();
+      });
+
+      document.querySelectorAll('.card[data-project]').forEach(function (card) {
+        var link = card.querySelector('h3 a');
+        if (link) {
+          link.addEventListener('click', function (e) {
+            e.preventDefault();
+            openPanel(card);
+          });
+        }
+        card.addEventListener('click', function (e) {
+          if (e.target.closest('a')) return;
+          openPanel(card);
+        });
+      });
+
+      overlay.addEventListener('click', closePanel);
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && isOpen) closePanel();
+      });
     })();
   </script>
 </body>
