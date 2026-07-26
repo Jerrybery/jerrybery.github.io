@@ -1,11 +1,10 @@
 {
-  "generated_at": "2026-07-25",
+  "generated_at": "2026-07-26",
   "window_days": 30,
-  "commits": 69,
-  "active_days": 12,
+  "commits": 60,
+  "active_days": 11,
   "streak_days": 6,
   "spark": [
-    1,
     0,
     3,
     23,
@@ -30,13 +29,14 @@
     0,
     5,
     3,
-    30
+    32,
+    0
   ],
   "repos": [
     {
       "name": "hackerthon",
       "url": "https://github.com/Jerrybery/hackerthon",
-      "count": 8,
+      "count": 10,
       "private": false
     },
     {
@@ -60,7 +60,7 @@
     {
       "name": "Private repos",
       "url": null,
-      "count": 52,
+      "count": 41,
       "private": true
     }
   ]
