@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-27",
+  "generated_at": "2026-07-28",
   "window_days": 30,
-  "commits": 40,
-  "active_days": 10,
+  "commits": 33,
+  "active_days": 9,
   "streak_days": 6,
   "spark": [
     0,
@@ -40,12 +40,6 @@
       "private": false
     },
     {
-      "name": "jerrybery.github.io",
-      "url": "https://github.com/Jerrybery/jerrybery.github.io",
-      "count": 6,
-      "private": false
-    },
-    {
       "name": "Armory_Ring",
       "url": "https://github.com/Jerrybery/Armory_Ring",
       "count": 2,
@@ -60,7 +54,7 @@
     {
       "name": "Private repos",
       "url": null,
-      "count": 21,
+      "count": 20,
       "private": true
     }
   ]
