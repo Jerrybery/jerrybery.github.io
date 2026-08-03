@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cyborg — Jierui Liu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A multi-user household agent: per-user identity and memory, a six-layer memory hierarchy, and temperature-driven offline consolidation.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:        #eef1f3;
+      --bg-card:   #ffffff;
+      --text:      #14191c;
+      --muted:     #5a6670;
+      --line:      #d4dbe0;
+      --accent:    #0c8f7d;
+      --accent-2:  #0a7464;
+      --chip-bg:   #e2e8ec;
+      --shadow:    0 1px 2px rgba(20,25,28,.04), 0 8px 24px rgba(20,25,28,.06);
+      --display: "Bricolage Grotesque", Georgia, serif;
+      --body: "IBM Plex Sans", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0d1113;
+        --bg-card:   #161b1e;
+        --text:      #e4edf0;
+        --muted:     #8794a0;
+        --line:      #232b30;
+        --accent:    #2dd4bf;
+        --accent-2:  #5eead4;
+        --chip-bg:   #19211f;
+        --shadow:    0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+      background-image: radial-gradient(var(--line) .5px, transparent .5px);
+      background-size: 22px 22px;
+      background-position: -11px -11px;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
+
+    .wrap { max-width: 780px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* nav */
+    nav {
+      padding: 1.5rem 0 1rem;
+      font-family: var(--mono);
+      font-size: .85rem;
+    }
+    nav a { display: inline-flex; align-items: center; gap: .4rem; }
+
+    /* hero */
+    header { padding: 0 0 3.5rem; }
+    .hero-text { margin-bottom: 1.75rem; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: .75rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    h1 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      margin-bottom: .75rem;
+    }
+    .lead {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 55ch;
+      margin-bottom: 1rem;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 1.2rem;
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--muted);
+    }
+    .meta span { display: inline-flex; align-items: center; gap: .45rem; }
+    .meta-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .hero-media {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: var(--shadow);
+      padding: 1.4rem;
+    }
+    .hero-media svg { display: block; width: 100%; height: auto; }
+
+    /* sections */
+    main { padding: 2rem 0 3rem; }
+    section { padding: 2.8rem 0; border-bottom: 1px solid var(--line); }
+    section:last-of-type { border-bottom: 0; }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    h2::before {
+      content: "";
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: .5rem;
+    }
+    p { color: var(--muted); margin-bottom: 1rem; }
+    p strong { color: var(--text); font-weight: 600; }
+
+    .features { display: grid; gap: 1.1rem; }
+    .feature {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      box-shadow: var(--shadow);
+    }
+    .feature p { margin-bottom: 0; font-size: .95rem; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .chips span {
+      font-family: var(--mono);
+      font-size: .78rem;
+      background: var(--chip-bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: .3rem .65rem;
+      border-radius: 6px;
+    }
+
+    .highlights { list-style: none; }
+    .highlights li {
+      position: relative;
+      padding-left: 1.3rem;
+      margin-bottom: .8rem;
+      color: var(--muted);
+    }
+    .highlights li::before {
+      content: "›";
+      position: absolute; left: 0; top: -.05em;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+    }
+    .highlights li strong { color: var(--text); font-weight: 600; }
+
+    .super-link {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: .3rem;
+    }
+    .super-link:hover { color: var(--accent); text-decoration: none; }
+    .super-link span { color: var(--accent); }
+
+    footer {
+      padding: 2.5rem 0 3rem;
+      font-family: var(--mono);
+      font-size: .74rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+  <style>
+    .embed nav { display: block; padding: 1.25rem 0 1rem; }
+    .embed nav a { cursor: pointer; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-family: var(--mono);
+      font-size: .82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      color: var(--accent);
+      padding: .5rem .85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .back-btn:hover { border-color: var(--accent); background: var(--chip-bg); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav class="wrap">
+    <a class="back-btn" href="index.html" onclick="event.preventDefault(); if (window.parent !== window) window.parent.postMessage('close-project-panel', '*'); else location.href = 'index.html';">← Back to projects</a>
+  </nav>
+
+  <header class="wrap">
+    <div class="hero-text">
+      <p class="eyebrow">Multi-user household agent · memory system</p>
+      <h1>Cyborg</h1>
+      <p class="lead">
+        An agent built for the <strong>multi-user household</strong>: every family member gets an
+        independent identity and memory, daily conversation accumulates each person's preferences
+        and habits, and offline consolidation catches <strong>cross-member contradictions</strong> —
+        dad says Saturday, mom booked Sunday.
+      </p>
+      <div class="meta">
+        <span><span class="meta-dot"></span> Python · FastAPI-style web + SSE</span>
+        <span><span class="meta-dot"></span> Docker / docker-compose</span>
+        <span><span class="meta-dot"></span> MIT</span>
+      </div>
+    </div>
+
+    <div class="hero-media">
+      <svg viewBox="0 0 720 210" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g font-family="IBM Plex Mono, ui-monospace, monospace" font-size="11">
+          <!-- memory ladder L1..L6 -->
+          <rect x="20" y="16" width="270" height="24" rx="6" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.4"/>
+          <text x="32" y="32" fill="var(--muted)">L1</text>
+          <rect x="20" y="46" width="270" height="24" rx="6" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.4"/>
+          <text x="32" y="62" fill="var(--muted)">L2</text>
+          <rect x="20" y="76" width="270" height="24" rx="6" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.4"/>
+          <text x="32" y="92" fill="var(--muted)">L3</text>
+
+          <rect x="20" y="106" width="270" height="24" rx="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="32" y="122" fill="var(--muted)">L4 · daily diary <tspan fill="var(--accent)">DistillEngine</tspan></text>
+
+          <rect x="20" y="136" width="270" height="24" rx="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="32" y="152" fill="var(--muted)">L5 · long-term <tspan fill="var(--accent)">USER · FAMILY · RECENT</tspan></text>
+
+          <rect x="20" y="166" width="270" height="28" rx="6" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="32" y="184" fill="var(--muted)">L6 · Dream engine <tspan fill="var(--accent-2)">cross-user</tspan></text>
+
+          <!-- hierarchy annotation -->
+          <text x="306" y="32" fill="var(--muted)" font-size="10">prompt-level</text>
+          <text x="306" y="172" fill="var(--muted)" font-size="10">offline consolidation</text>
+
+          <!-- temperature model -->
+          <rect x="480" y="76" width="200" height="52" rx="8" fill="var(--bg-card)" stroke="var(--muted)" stroke-width="1.6"/>
+          <text x="496" y="97" fill="var(--muted)">Temperature model</text>
+          <text x="496" y="114" fill="var(--muted)" font-size="10">drift + scene change</text>
+        </g>
+        <g stroke="var(--muted)" stroke-width="1.4">
+          <path d="M300 40 V166"/><path d="M295 160 l5 8 5 -8"/>
+        </g>
+        <g stroke="var(--accent-2)" stroke-width="1.6" stroke-dasharray="5 4">
+          <path d="M530 128 V180 H296"/><path d="M302 174 l-8 6 8 6"/>
+        </g>
+        <text x="534" y="150" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="10" fill="var(--accent-2)">backlog high → run Dream</text>
+      </svg>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>
+        Most agents are single-user by assumption. Cyborg starts from the opposite premise: it lives
+        in a household. Each family member talks to it through their own session, and the agent keeps
+        <strong>per-user identity and memory strictly separate</strong> — preferences, habits, and
+        history accumulate per person over daily conversation.
+      </p>
+      <p>
+        The interesting problems only appear between users: one person's "we leave Saturday" is
+        another's "hotel booked for Sunday". A single offline pass with access to everyone's memory
+        — the <strong>Dream engine</strong> — is where those contradictions surface.
+      </p>
+    </section>
+
+    <section id="memory">
+      <h2>Memory Hierarchy</h2>
+      <p>
+        Memory is organized as six layers, <strong>L1–L6</strong>, from prompt-level instructions up
+        to offline consolidation. The lower layers stay close to the live context; the three engines
+        below do the long-term work.
+      </p>
+      <div class="features">
+        <div class="feature">
+          <h3>L4 — daily diary (DistillEngine)</h3>
+          <p>Each day's session is distilled into a diary entry per user. L4 is per-user isolated — no cross-user visibility at this layer.</p>
+        </div>
+        <div class="feature">
+          <h3>L5 — long-term memory</h3>
+          <p>Durable facts organized as <code>USER / FAMILY / RECENT</code>. Writes go through an auth-gated layer (<code>distill_tools</code>), so long-term memory is never modified without an explicit, checked write path. Also per-user isolated.</p>
+        </div>
+        <div class="feature">
+          <h3>L6 — Dream engine</h3>
+          <p>The only layer that does <strong>cross-user analysis</strong>. Running offline over L4/L5, it consolidates and catches contradictions between members — the Saturday-vs-Sunday class of conflicts.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="temperature">
+      <h2>Temperature-Driven Consolidation</h2>
+      <p>
+        Dream runs are not on a fixed schedule. A <strong>temperature model</strong> tracks the
+        information backlog — information drift plus scene changes — and triggers the Dream engine
+        only when the backlog is hot enough. Consolidation cost scales with actual change, not
+        wall-clock time, which cuts token spend on quiet days.
+      </p>
+      <p>
+        <strong>Tagged memory files</strong> let Dreaming trace hierarchical relationships between
+        memories, so a consolidation pass can find and update exactly the affected files instead of
+        rewriting wholesale.
+      </p>
+    </section>
+
+    <section id="multiuser">
+      <h2>Multi-User by Design</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>Per-user session</h3>
+          <p>One session per user per day. WeChat (ClawBot) and the web SSE channel feed into the same context, so a conversation started on one channel continues seamlessly on the other.</p>
+        </div>
+        <div class="feature">
+          <h3>CompactEngine</h3>
+          <p>Zero-latency context reorganization: the context window is managed against a limit of <code>0.83</code> of the model's context, with a configurable compression threshold.</p>
+        </div>
+        <div class="feature">
+          <h3>MCP tool architecture</h3>
+          <p>Built-in tools plus extension over the MCP protocol, backed by a multi-provider LLM client (Anthropic / OpenAI / DeepSeek).</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="status">
+      <h2>Status</h2>
+      <ul class="highlights">
+        <li><strong>Phase 1 — done:</strong> the memory core. Distill, Compact, and Dream engines are working.</li>
+        <li><strong>Phase 2 — in progress:</strong> temperature model done, L5 context injection done; Recall retrieval and conflict detection in progress.</li>
+      </ul>
+    </section>
+
+    <section id="stack">
+      <h2>Tech Stack</h2>
+      <p class="chips">
+        <span>Python</span>
+        <span>FastAPI-style web + SSE</span>
+        <span>MCP</span>
+        <span>Anthropic / OpenAI / DeepSeek</span>
+        <span>Docker / docker-compose</span>
+        <span>Cloudflare Tunnel (optional)</span>
+        <span>MIT</span>
+      </p>
+    </section>
+
+    <section id="links">
+      <h2>Links</h2>
+      <p>The repository is currently private.</p>
+      <a class="super-link" href="https://github.com/Jerrybery/cyborg" target="_blank" rel="noopener">
+        github.com/Jerrybery/cyborg <span>↗</span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    © 2026 Jierui Liu — built with plain HTML/CSS.
+  </footer>
+
+  <script>
+    if (location.search.includes('embed=1')) document.body.classList.add('embed');
+  </script>
+</body>
+</html>
