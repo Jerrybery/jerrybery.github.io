@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Robot Control Base — Jierui Liu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="In design: the robot-arm execution layer for the Bilibili livestream agent — a standalone Python repo in the LeRobot ecosystem implementing the live-control-plane Tool contract.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:        #eef1f3;
+      --bg-card:   #ffffff;
+      --text:      #14191c;
+      --muted:     #5a6670;
+      --line:      #d4dbe0;
+      --accent:    #0c8f7d;
+      --accent-2:  #0a7464;
+      --chip-bg:   #e2e8ec;
+      --shadow:    0 1px 2px rgba(20,25,28,.04), 0 8px 24px rgba(20,25,28,.06);
+      --display: "Bricolage Grotesque", Georgia, serif;
+      --body: "IBM Plex Sans", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0d1113;
+        --bg-card:   #161b1e;
+        --text:      #e4edf0;
+        --muted:     #8794a0;
+        --line:      #232b30;
+        --accent:    #2dd4bf;
+        --accent-2:  #5eead4;
+        --chip-bg:   #19211f;
+        --shadow:    0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+      background-image: radial-gradient(var(--line) .5px, transparent .5px);
+      background-size: 22px 22px;
+      background-position: -11px -11px;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
+
+    .wrap { max-width: 780px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* nav */
+    nav {
+      padding: 1.5rem 0 1rem;
+      font-family: var(--mono);
+      font-size: .85rem;
+    }
+    nav a { display: inline-flex; align-items: center; gap: .4rem; }
+
+    /* hero */
+    header { padding: 0 0 3.5rem; }
+    .hero-text { margin-bottom: 1.75rem; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: .75rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    h1 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      margin-bottom: .75rem;
+    }
+    .lead {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 55ch;
+      margin-bottom: 1rem;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 1.2rem;
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--muted);
+    }
+    .meta span { display: inline-flex; align-items: center; gap: .45rem; }
+    .meta-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .meta-dot.planned { background: var(--muted); }
+
+    .hero-media {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: var(--shadow);
+      padding: 1.4rem;
+    }
+    .hero-media svg { display: block; width: 100%; height: auto; }
+
+    /* sections */
+    main { padding: 2rem 0 3rem; }
+    section { padding: 2.8rem 0; border-bottom: 1px solid var(--line); }
+    section:last-of-type { border-bottom: 0; }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    h2::before {
+      content: "";
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: .5rem;
+    }
+    p { color: var(--muted); margin-bottom: 1rem; }
+    p strong { color: var(--text); font-weight: 600; }
+
+    .features { display: grid; gap: 1.1rem; }
+    .feature {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      box-shadow: var(--shadow);
+    }
+    .feature p { margin-bottom: 0; font-size: .95rem; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .chips span {
+      font-family: var(--mono);
+      font-size: .78rem;
+      background: var(--chip-bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: .3rem .65rem;
+      border-radius: 6px;
+    }
+
+    .arch {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.4rem;
+      font-family: var(--mono);
+      font-size: .82rem;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+      margin-bottom: 1.2rem;
+    }
+    .arch pre { color: var(--muted); line-height: 1.6; }
+
+    .highlights { list-style: none; }
+    .highlights li {
+      position: relative;
+      padding-left: 1.3rem;
+      margin-bottom: .8rem;
+      color: var(--muted);
+    }
+    .highlights li::before {
+      content: "›";
+      position: absolute; left: 0; top: -.05em;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+    }
+    .highlights li strong { color: var(--text); font-weight: 600; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: var(--mono);
+      font-size: .78rem;
+      background: var(--chip-bg);
+      border: 1px dashed var(--muted);
+      color: var(--text);
+      padding: .4rem .8rem;
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+    }
+    .status .meta-dot { background: var(--muted); }
+
+    footer {
+      padding: 2.5rem 0 3rem;
+      font-family: var(--mono);
+      font-size: .74rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+  <style>
+    .embed nav { display: block; padding: 1.25rem 0 1rem; }
+    .embed nav a { cursor: pointer; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-family: var(--mono);
+      font-size: .82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      color: var(--accent);
+      padding: .5rem .85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .back-btn:hover { border-color: var(--accent); background: var(--chip-bg); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav class="wrap">
+    <a class="back-btn" href="index.html" onclick="event.preventDefault(); if (window.parent !== window) window.parent.postMessage('close-project-panel', '*'); else location.href = 'index.html';">← Back to projects</a>
+  </nav>
+
+  <header class="wrap">
+    <div class="hero-text">
+      <p class="eyebrow">Robotics · in design</p>
+      <h1>Robot Control Base</h1>
+      <p class="lead">
+        The robot arm that will let the <a href="agent-bilibili-panel.html">Live Control Plane</a>
+        agent act in the physical world — waving, pointing, and reacting on stream. Planned as a
+        standalone <strong>Python</strong> repo in the <strong>LeRobot</strong> ecosystem.
+      </p>
+      <div class="meta">
+        <span><span class="meta-dot planned"></span> status: in design — not built yet</span>
+        <span><span class="meta-dot"></span> Python · LeRobot</span>
+        <span><span class="meta-dot"></span> Tool-contract implementation</span>
+      </div>
+    </div>
+
+    <div class="hero-media">
+      <svg viewBox="0 0 720 220" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g stroke="var(--accent)" stroke-width="3">
+          <path d="M120 170 V120 L190 88 L250 124"/>
+        </g>
+        <rect x="86" y="170" width="68" height="20" rx="5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2.4"/>
+        <circle cx="120" cy="120" r="7" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="190" cy="88" r="7" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+        <path d="M250 124 L282 108 M250 124 L282 140" stroke="var(--accent-2)" stroke-width="2.6"/>
+        <text x="86" y="212" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="11" fill="var(--muted)">robot arm (hardware TBD)</text>
+
+        <path d="M296 124 Q360 100 420 116" stroke="var(--muted)" stroke-width="1.8" stroke-dasharray="5 4" fill="none"/>
+        <path d="M412 108 l9 8 -11 5" stroke="var(--muted)" stroke-width="1.8"/>
+
+        <rect x="432" y="76" width="260" height="80" rx="10" fill="var(--bg-card)" stroke="var(--muted)" stroke-width="1.8" stroke-dasharray="6 5"/>
+        <text x="452" y="106" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="12" fill="var(--text)">Tool contract</text>
+        <text x="452" y="126" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="11" fill="var(--muted)">zod args · AbortSignal</text>
+        <text x="452" y="143" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="11" fill="var(--muted)">ToolResult ok / error</text>
+        <text x="432" y="180" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="11" fill="var(--muted)">contract owned by live-control-plane</text>
+      </svg>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="status">
+      <h2>Status</h2>
+      <p class="status"><span class="meta-dot"></span> in design — goals and contract defined, no code yet</p>
+      <p>
+        This page describes a <strong>plan, not a finished project</strong>. The livestream side
+        (<a href="agent-bilibili-panel.html">Live Control Plane</a>) exists and already calls tools
+        through a fixed interface; this repo will be the execution end that makes those calls move a
+        real arm. Everything below is the design for that.
+      </p>
+    </section>
+
+    <section id="goals">
+      <h2>Goals</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>Physical presence on stream</h3>
+          <p>Give the livestream agent a body: a small robot arm on the desk that can wave, point, pick up light props, and react visibly when the audience swaps its persona.</p>
+        </div>
+        <div class="feature">
+          <h3>Implement the Tool contract</h3>
+          <p>Each whitelisted tool in the control plane — with zod-schema arguments, a <code>ToolContext</code> carrying an <code>AbortSignal</code> for barge-in, and a typed <code>ToolResult</code> ok/error — gets a real hardware implementation here.</p>
+        </div>
+        <div class="feature">
+          <h3>LeRobot-native</h3>
+          <p>Build on the LeRobot ecosystem for robot interfaces, calibration, and (later) learned policies, instead of a one-off driver stack.</p>
+        </div>
+        <div class="feature">
+          <h3>Safe by default</h3>
+          <p>Serial execution, joint-limit enforcement, and honoring <code>AbortSignal</code> mid-motion so a barge-in from the stream stops the arm cleanly.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="contract">
+      <h2>The Contract It Implements</h2>
+      <p>
+        The interface is owned by the control plane; this repo never changes it, only satisfies it.
+      </p>
+      <div class="arch">
+        <pre>live-control-plane (TypeScript)          agent-robotcontrol-base (Python, planned)
+┌───────────────────────────┐            ┌───────────────────────────┐
+│ Agent → ToolRegistry      │  Tool      │ Tool implementations:     │
+│  · zod-validated args     │  contract  │  · wave / point / pick    │
+│  · per-persona whitelist  │ ─────────▶ │  · LeRobot robot interface│
+│  · serial exec queue      │  args +    │  · honors AbortSignal     │
+│  · AbortSignal (barge-in) │  signal    │  · returns ToolResult     │
+└───────────────────────────┘            └───────────────────────────┘</pre>
+      </div>
+    </section>
+
+    <section id="why-separate">
+      <h2>Why a Separate Repo</h2>
+      <ul class="highlights">
+        <li><strong>Different iteration speeds:</strong> hardware bring-up, calibration, and driver work churn constantly; the stream logic shouldn't have to.</li>
+        <li><strong>Different stacks:</strong> the control plane is TypeScript; the robotics ecosystem that matters here (LeRobot) is Python.</li>
+        <li><strong>A real boundary:</strong> the Tool contract is the only coupling. Each side can be developed, tested, and replaced independently — the control plane already runs against a mocked execution end.</li>
+      </ul>
+    </section>
+
+    <section id="plan">
+      <h2>Plan</h2>
+      <ul class="highlights">
+        <li><strong>Step 1 — mock-faithful server:</strong> a Python service exposing the Tool contract, initially driving a simulated arm so the control plane can integrate against it end-to-end.</li>
+        <li><strong>Step 2 — hardware bring-up:</strong> pick an arm supported in the LeRobot ecosystem, wire up calibration and basic motion primitives.</li>
+        <li><strong>Step 3 — stream-ready motions:</strong> a small library of expressive, interruptible motions mapped to the whitelisted tools.</li>
+      </ul>
+    </section>
+
+    <section id="stack">
+      <h2>Planned Stack</h2>
+      <p class="chips">
+        <span>Python</span>
+        <span>LeRobot</span>
+        <span>Tool contract (from live-control-plane)</span>
+        <span>AbortSignal-aware execution</span>
+      </p>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    © 2026 Jierui Liu — built with plain HTML/CSS.
+  </footer>
+
+  <script>
+    if (location.search.includes('embed=1')) document.body.classList.add('embed');
+  </script>
+</body>
+</html>
