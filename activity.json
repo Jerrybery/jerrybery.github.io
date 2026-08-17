@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-16",
+  "generated_at": "2026-08-17",
   "window_days": 30,
   "commits": 53,
-  "active_days": 14,
+  "active_days": 15,
   "streak_days": 6,
   "spark": [
     24,
@@ -30,7 +30,7 @@
     1,
     24,
     2,
-    0
+    1
   ],
   "repos": [
     {
