@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-24",
+  "generated_at": "2026-08-25",
   "window_days": 30,
-  "commits": 32,
-  "active_days": 11,
+  "commits": 24,
+  "active_days": 10,
   "streak_days": 6,
   "spark": [
     3,
@@ -34,21 +34,9 @@
   ],
   "repos": [
     {
-      "name": "hackerton",
-      "url": "https://github.com/Jerrybery/hackerton",
-      "count": 7,
-      "private": false
-    },
-    {
       "name": "jerrybery.github.io",
       "url": "https://github.com/Jerrybery/jerrybery.github.io",
       "count": 2,
-      "private": false
-    },
-    {
-      "name": "music-orchestra",
-      "url": "https://github.com/Jerrybery/music-orchestra",
-      "count": 1,
       "private": false
     },
     {
