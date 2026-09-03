@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-02",
+  "generated_at": "2026-09-03",
   "window_days": 30,
-  "commits": 23,
-  "active_days": 8,
+  "commits": 5,
+  "active_days": 7,
   "streak_days": 6,
   "spark": [
     15,
@@ -34,15 +34,9 @@
   ],
   "repos": [
     {
-      "name": "jerrybery.github.io",
-      "url": "https://github.com/Jerrybery/jerrybery.github.io",
-      "count": 2,
-      "private": false
-    },
-    {
       "name": "Private repos",
       "url": null,
-      "count": 21,
+      "count": 5,
       "private": true
     }
   ]
