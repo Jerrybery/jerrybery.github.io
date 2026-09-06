@@ -1,11 +1,10 @@
 {
-  "generated_at": "2026-09-05",
+  "generated_at": "2026-09-06",
   "window_days": 30,
   "commits": 1,
   "active_days": 5,
   "streak_days": 6,
   "spark": [
-    15,
     9,
     6,
     12,
@@ -29,6 +28,7 @@
     24,
     2,
     2,
+    0,
     0,
     0
   ],
