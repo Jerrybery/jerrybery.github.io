@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rethinker Prompt Forge — Jierui Liu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Rethinker Prompt Forge — closed-loop embodied prompt optimization for robotic manipulation: rethink failures via vision-language reasoning, forge prompts under strict validation gates.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:        #eef1f3;
+      --bg-card:   #ffffff;
+      --text:      #14191c;
+      --muted:     #5a6670;
+      --line:      #d4dbe0;
+      --accent:    #0c8f7d;
+      --accent-2:  #0a7464;
+      --chip-bg:   #e2e8ec;
+      --shadow:    0 1px 2px rgba(20,25,28,.04), 0 8px 24px rgba(20,25,28,.06);
+      --display: "Bricolage Grotesque", Georgia, serif;
+      --body: "IBM Plex Sans", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0d1113;
+        --bg-card:   #161b1e;
+        --text:      #e4edf0;
+        --muted:     #8794a0;
+        --line:      #232b30;
+        --accent:    #2dd4bf;
+        --accent-2:  #5eead4;
+        --chip-bg:   #19211f;
+        --shadow:    0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+      background-image: radial-gradient(var(--line) .5px, transparent .5px);
+      background-size: 22px 22px;
+      background-position: -11px -11px;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
+
+    .wrap { max-width: 780px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* nav */
+    nav {
+      padding: 1.5rem 0 1rem;
+      font-family: var(--mono);
+      font-size: .85rem;
+    }
+    nav a { display: inline-flex; align-items: center; gap: .4rem; }
+
+    /* hero */
+    header { padding: 0 0 3.5rem; }
+    .hero-text { margin-bottom: 1.75rem; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: .75rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    h1 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      margin-bottom: .75rem;
+    }
+    .lead {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 55ch;
+      margin-bottom: 1rem;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 1.2rem;
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--muted);
+    }
+    .meta span { display: inline-flex; align-items: center; gap: .45rem; }
+    .meta-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .hero-media {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: var(--shadow);
+      padding: 1.4rem;
+    }
+    .hero-media svg { display: block; width: 100%; height: auto; }
+
+    /* sections */
+    main { padding: 2rem 0 3rem; }
+    section { padding: 2.8rem 0; border-bottom: 1px solid var(--line); }
+    section:last-of-type { border-bottom: 0; }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    h2::before {
+      content: "";
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: .5rem;
+    }
+    p { color: var(--muted); margin-bottom: 1rem; }
+    p strong { color: var(--text); font-weight: 600; }
+
+    .features { display: grid; gap: 1.1rem; }
+    .feature {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      box-shadow: var(--shadow);
+    }
+    .feature p { margin-bottom: 0; font-size: .95rem; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .chips span {
+      font-family: var(--mono);
+      font-size: .78rem;
+      background: var(--chip-bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: .3rem .65rem;
+      border-radius: 6px;
+    }
+
+    .highlights { list-style: none; }
+    .highlights li {
+      position: relative;
+      padding-left: 1.3rem;
+      margin-bottom: .8rem;
+      color: var(--muted);
+    }
+    .highlights li::before {
+      content: "›";
+      position: absolute; left: 0; top: -.05em;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+    }
+    .highlights li strong { color: var(--text); font-weight: 600; }
+
+    .super-link {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: .3rem;
+    }
+    .super-link:hover { color: var(--accent); text-decoration: none; }
+    .super-link span { color: var(--accent); }
+
+    footer {
+      padding: 2.5rem 0 3rem;
+      font-family: var(--mono);
+      font-size: .74rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+  <style>
+    .embed nav { display: block; padding: 1.25rem 0 1rem; }
+    .embed nav a { cursor: pointer; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-family: var(--mono);
+      font-size: .82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      color: var(--accent);
+      padding: .5rem .85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .back-btn:hover { border-color: var(--accent); background: var(--chip-bg); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav class="wrap">
+    <a class="back-btn" href="index.html" onclick="event.preventDefault(); if (window.parent !== window) window.parent.postMessage('close-project-panel', '*'); else location.href = 'index.html';">← Back to projects</a>
+  </nav>
+
+  <header class="wrap">
+    <div class="hero-text">
+      <p class="eyebrow">Robotic manipulation · prompt optimization</p>
+      <h1>Rethinker Prompt Forge</h1>
+      <p class="lead">
+        A robotic manipulation research project that <strong>rethinks failure cases via vision-language
+        reasoning</strong> and <strong>forges embodied prompts</strong> in a closed loop — with the
+        governance rules that keep its results honest.
+      </p>
+      <div class="meta">
+        <span><span class="meta-dot"></span> Python · RoboTwin sim</span>
+        <span><span class="meta-dot"></span> vLLM + cloud critic</span>
+        <span><span class="meta-dot"></span> Occlusion-aware perception</span>
+      </div>
+    </div>
+
+    <div class="hero-media">
+      <svg viewBox="0 0 720 210" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g font-family="IBM Plex Mono, ui-monospace, monospace" font-size="11">
+          <!-- forge loop -->
+          <rect x="30" y="40" width="130" height="34" rx="8" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="46" y="61" fill="var(--muted)">train rollouts</text>
+
+          <rect x="210" y="40" width="130" height="34" rx="8" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.6"/>
+          <text x="222" y="57" fill="var(--muted)">video-stage critic</text>
+          <text x="222" y="70" fill="var(--muted)" font-size="9">on failures</text>
+
+          <rect x="390" y="40" width="130" height="34" rx="8" fill="var(--bg-card)" stroke="var(--line)" stroke-width="1.6"/>
+          <text x="402" y="57" fill="var(--muted)">optimizer</text>
+          <text x="402" y="70" fill="var(--muted)" font-size="9">bounded edits</text>
+
+          <rect x="570" y="40" width="120" height="34" rx="8" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="586" y="57" fill="var(--muted)">val gate</text>
+          <text x="586" y="70" fill="var(--muted)" font-size="9">4 eps × 4 tasks</text>
+
+          <rect x="270" y="140" width="180" height="34" rx="8" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="284" y="157" fill="var(--muted)">A/B confirmation</text>
+          <text x="284" y="170" fill="var(--muted)" font-size="9">48 interleaved episodes</text>
+        </g>
+        <g stroke="var(--muted)" stroke-width="1.6">
+          <path d="M160 57 H210"/><path d="M202 52 l8 5 -8 5"/>
+          <path d="M340 57 H390"/><path d="M382 52 l8 5 -8 5"/>
+          <path d="M520 57 H570"/><path d="M562 52 l8 5 -8 5"/>
+        </g>
+        <g stroke="var(--accent-2)" stroke-width="1.6" stroke-dasharray="5 4">
+          <path d="M630 74 V157 H450"/><path d="M458 152 l-8 5 8 5"/>
+          <path d="M270 157 H95 V74"/><path d="M101 80 l-6 -6 -6 6"/>
+        </g>
+        <text x="500" y="120" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="10" fill="var(--accent-2)">nomination only</text>
+        <text x="100" y="150" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="10" fill="var(--accent-2)">confirmed → promote</text>
+        <text x="30" y="200" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="10" fill="var(--muted)">RoboTwin · franka-panda · occlusion via PhysX raycasts + hidden_by rules</text>
+      </svg>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>
+        Prompt optimization for embodied agents is easy to do and hard to do <strong>honestly</strong>:
+        a lucky seed, an all-knowing detector, or a single-episode delta can make any edit look like an
+        improvement. This project builds the loop end to end — <strong>RoboTwin</strong> rollouts under
+        occlusion, a video-stage critic that rethinks each failure, and an optimizer that makes bounded
+        prompt edits — and then surrounds it with the gates that keep the results believable.
+      </p>
+      <p>
+        The embodiment is a single-arm <strong>franka-panda</strong> in RoboTwin (mirroring the
+        Realman-65B target). Perception is deliberately <strong>not all-knowing</strong>: PhysX raycasts
+        from the head camera plus declarative <code>hidden_by</code> cover rules decide which objects
+        even appear in observations.
+      </p>
+    </section>
+
+    <section id="pipeline">
+      <h2>The Five-Layer Pipeline</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>1 — Honest environment</h3>
+          <p>Every task passes an <strong>actor-mapping audit</strong>; grasps and places go through RoboTwin actor-level skills. <code>lift()</code> physically verifies the carry — a kinematically successful but empty grasp is retried once, then reported as failure.</p>
+        </div>
+        <div class="feature">
+          <h3>2 — Task-set governance</h3>
+          <p>Admission requires a reachability smoke test, stable scene generation, and <strong>discrimination</strong>: neither trivially solvable nor physically impossible, but in the "strategy-dependent" band. Held-out val tasks use different seeds/variants. Current set: train 4 / val 4.</p>
+        </div>
+        <div class="feature">
+          <h3>3 — Forge loop</h3>
+          <p>Per epoch: train rollouts → video-stage <strong>critic</strong> on failures → <strong>optimizer</strong> bounded edits → candidate registered → validation gate. A faulthandler watchdog guards against SAPIEN/GPU contention wedges.</p>
+        </div>
+        <div class="feature">
+          <h3>4 — Quality gate</h3>
+          <p><strong>4 episodes per val task, never single-episode deltas.</strong> Lexicographic composite of (success rate, −average steps), with steps counted over successful episodes only — a candidate must not "improve" by failing fast.</p>
+        </div>
+        <div class="feature">
+          <h3>5 — Confirmation &amp; promotion</h3>
+          <p>A gate accept is a <strong>nomination, not a result</strong>. Promotion requires a paired confirmation: 48 interleaved A/B episodes, positive only when the candidate wins overall and is not worse on any single task.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="highlights">
+      <h2>Implementation Highlights</h2>
+      <ul class="highlights">
+        <li><strong>Occlusion as a first-class citizen:</strong> raycast visibility + cover rules mean the planner must reason about what it cannot see — the "rethinker" cases the project is named after.</li>
+        <li><strong>Ablation baselines:</strong> monolithic planner, no-hidden-hypothesis, and no-reflection variants share one prompt registry, so the loop's gains can be attributed.</li>
+        <li><strong>Physical-variance discipline:</strong> bands overlap easily at small N — a confirmation delta must be visible in at least two tasks, not one.</li>
+      </ul>
+    </section>
+
+    <section id="stack">
+      <h2>Tech Stack</h2>
+      <p class="chips">
+        <span>Python</span>
+        <span>RoboTwin / SAPIEN</span>
+        <span>franka-panda</span>
+        <span>vLLM planner (DeepSeek via OpenRouter)</span>
+        <span>DINO perception</span>
+        <span>AnyGrasp</span>
+        <span>Cloud critic</span>
+        <span>curobo motion planning</span>
+      </p>
+    </section>
+
+    <section id="links">
+      <h2>Links</h2>
+      <p>The repository is currently private.</p>
+      <a class="super-link" href="https://github.com/Jerrybery/rethinker-promptforge" target="_blank" rel="noopener">
+        github.com/Jerrybery/rethinker-promptforge <span>↗</span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    © 2026 Jierui Liu — built with plain HTML/CSS.
+  </footer>
+
+  <script>
+    if (location.search.includes('embed=1')) document.body.classList.add('embed');
+  </script>
+</body>
+</html>
