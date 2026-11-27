@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-26",
+  "generated_at": "2026-11-27",
   "window_days": 30,
-  "commits": 135,
-  "active_days": 13,
+  "commits": 134,
+  "active_days": 12,
   "streak_days": 9,
   "spark": [
     0,
@@ -36,7 +36,7 @@
     {
       "name": "Private repos",
       "url": null,
-      "count": 135,
+      "count": 134,
       "private": true
     }
   ]
